@@ -1,4 +1,4 @@
-package exception;
+package io.github.appleaww.messenger.exception;
 
 import java.time.Instant;
 
@@ -7,3 +7,4 @@ public record ErrorResponse(String code, String message, Instant timestamp) {
         this(code, message, Instant.now());
     }
 }
+

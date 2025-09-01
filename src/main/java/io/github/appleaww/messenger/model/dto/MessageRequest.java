@@ -1,4 +1,4 @@
-package model.dto;
+package io.github.appleaww.messenger.model.dto;
 
 import lombok.Data;
 
