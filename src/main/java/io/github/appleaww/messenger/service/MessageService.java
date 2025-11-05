@@ -9,6 +9,7 @@ import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.ChatRepository;
 import io.github.appleaww.messenger.repository.MessageRepository;
 import io.github.appleaww.messenger.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,18 +29,18 @@ public class MessageService {
     public MessageCreateResponseDTO createMessage(MessageCreateRequestDTO messageCreateRequestDTO) {
         //получение аутентифицированного пользователя
         String username = "   ";
-        User sender = userRepository.findByUsername(username).orElseThrow(RuntimeException::new);
+        User sender = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username " + username));
 
-        Chat chat = chatRepository.findById(messageCreateRequestDTO.chatId()).orElseThrow(RuntimeException::new);
-
+        Chat chat = chatRepository.findById(messageCreateRequestDTO.chatId())
+                .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + messageCreateRequestDTO.chatId()));
         if (!chat.getParticipants().contains(sender)) {
-            throw new RuntimeException();
+            throw new RuntimeException("Chat with id " + messageCreateRequestDTO.chatId() + "does not contain user with id " + sender.getId());
         }
 
-        Message message = messageMapper.toEntity(messageCreateRequestDTO, sender, chat);
-        Message savedMessage = messageRepository.save(message);
-
-        return messageMapper.toDTO(savedMessage);
+        Message message = messageRepository.save(messageMapper.toEntity(messageCreateRequestDTO, sender, chat));
+        log.debug("Message created with id {}",message.getId());
+        return messageMapper.toDTO(message);
     }
 
 }

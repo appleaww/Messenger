@@ -30,10 +30,17 @@ public class User {
     @Column(name = "password", length = 100, nullable = false)
     private String password;
 
-    @ManyToMany
-    @JoinTable(name = "user_chats", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "chat_id"))
-    Set<Chat> chats = new HashSet<>();
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    @OneToMany(mappedBy = "user")
-    Set<Message> messages = new HashSet<>();
+    @ManyToMany(mappedBy = "participants")
+    private Set<Chat> chats = new HashSet<>();
+
+    @OneToMany(mappedBy = "sender")
+    private Set<Message> messages = new HashSet<>();
+
+    public enum Role {
+        ADMIN, USER
+    }
 }

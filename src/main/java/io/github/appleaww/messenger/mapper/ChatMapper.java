@@ -12,15 +12,11 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ChatMapper {
-    public ChatCreateResponseDTO toDTO(Chat chat, String initiatorUsername){
-        User currentUser = chat.getParticipants().stream()
-                .filter(user -> user.getUsername().equals(initiatorUsername))
-                .findFirst().orElseThrow(RuntimeException::new);
-        String chatName = currentUser.getName();
-
+    public ChatCreateResponseDTO toDTO(Chat chat, User companion){
         return new ChatCreateResponseDTO(
                 chat.getId(),
-                chatName,
+                chat.getLastMessage(),
+                companion.getName(),
                 chat.getParticipants().stream().map(user -> new ParticipantDTO(user.getId(), user.getUsername())).collect(Collectors.toList())
         );
     }

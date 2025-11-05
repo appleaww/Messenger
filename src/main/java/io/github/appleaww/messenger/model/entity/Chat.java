@@ -6,10 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "chats", schema = "public")
@@ -30,13 +27,19 @@ public class Chat {
             name = "chat_names",
             joinColumns = @JoinColumn(name = "chat_id")
     )
-    @MapKeyJoinColumn(name = "user_id")
+    @MapKeyColumn(name = "user_id")
     @Column(name = "chat_name")
-    private Map<User, String> chatNames = new HashMap<>();
+    private Map<Long, String> chatNames = new HashMap<>();
 
-    @ManyToMany(mappedBy = "chats")
-    Set<User> participants = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "user_chats",
+            joinColumns = @JoinColumn(name = "chat_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> participants = new HashSet<>();
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<Message> messages = new HashSet<>();
+    @OrderBy("sendingTime ASC") //сортировка по времени отправки по ascending (возрастанию)
+    private List<Message> messages = new ArrayList<>();
 }

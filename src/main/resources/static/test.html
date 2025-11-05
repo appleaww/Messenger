@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Messenger Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>Messenger Test</h2>
+
+
+<!-- Chat -->
+<div id="chat" style="display:none">
+  <h3>Chat</h3>
+  <input type="text" id="messageInput" placeholder="Message">
+  <button onclick="sendMessage()">Send</button>
+  <div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:scroll"></div>
+</div>
+
+<script>
+  let stompClient = null;
+  let token = null;
+
+  async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+      });
+
+      if (response.ok) {
+          const data = await response.json();
+          token = data.token;
+          connectWebSocket();
+          document.getElementById('chat').style.display = 'block';
+          console.log('Login successful, token:', token);
+      } else {
+          const error = await response.text();
+          alert('Login failed: ' + error);
+      }
+  }
+
+  async function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const response = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+              email,
+              password,
+              username: email.split('@')[0],
+              role: 'USER'
+          })
+      });
+
+      if (response.ok) {
+          alert('Registration successful! Please login.');
+      } else {
+          const error = await response.text();
+          alert('Registration failed: ' + error);
+      }
+  }
+
+  function connectWebSocket() {
+      const socket = new SockJS('/ws');
+      stompClient = Stomp.over(socket);
+
+      stompClient.connect({ Authorization: `Bearer ${token}` }, function(frame) {
+          console.log('WebSocket connected');
+
+          // Subscribe to messages
+          stompClient.subscribe('/topic/chat/1', function(message) {
+              const msg = JSON.parse(message.body);
+              displayMessage(msg);
+          });
+      }, function(error) {
+          console.error('WebSocket error:', error);
+      });
+  }
+
+  function sendMessage() {
+      const message = document.getElementById('messageInput').value;
+      if (stompClient && message) {
+          stompClient.send('/app/chat/1/send', {}, JSON.stringify({
+              content: message,
+              timestamp: new Date()
+          }));
+          document.getElementById('messageInput').value = '';
+      }
+  }
+
+  function displayMessage(message) {
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML += `<div><strong>${message.sender || 'User'}:</strong> ${message.content}</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+</script>
+</body>
+</html>
