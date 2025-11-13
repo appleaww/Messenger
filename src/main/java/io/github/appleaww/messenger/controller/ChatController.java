@@ -1,7 +1,7 @@
 package io.github.appleaww.messenger.controller;
 
-import io.github.appleaww.messenger.model.dto.ChatCreateRequestDTO;
-import io.github.appleaww.messenger.model.dto.ChatCreateResponseDTO;
+import io.github.appleaww.messenger.model.dto.request.ChatCreateRequestDTO;
+import io.github.appleaww.messenger.model.dto.response.ChatCreateResponseDTO;
 import io.github.appleaww.messenger.model.dto.ChatDetailDTO;
 import io.github.appleaww.messenger.model.dto.ChatListItemDTO;
 import io.github.appleaww.messenger.model.entity.User;

@@ -1,14 +1,13 @@
 package io.github.appleaww.messenger.security;
 
-import io.github.appleaww.messenger.model.dto.AuthenticationResponse;
-import io.github.appleaww.messenger.model.dto.LoginRequestDTO;
-import io.github.appleaww.messenger.model.dto.RegisterRequestDTO;
+import io.github.appleaww.messenger.model.dto.response.AuthenticationResponse;
+import io.github.appleaww.messenger.model.dto.request.LoginRequestDTO;
+import io.github.appleaww.messenger.model.dto.request.RegisterRequestDTO;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.security.auth.Login;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

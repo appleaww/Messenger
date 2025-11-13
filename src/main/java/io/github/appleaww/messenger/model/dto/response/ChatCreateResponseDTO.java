@@ -1,4 +1,6 @@
-package io.github.appleaww.messenger.model.dto;
+package io.github.appleaww.messenger.model.dto.response;
+
+import io.github.appleaww.messenger.model.dto.ParticipantDTO;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package io.github.appleaww.messenger.mapper;
 
-import io.github.appleaww.messenger.model.dto.ChatCreateResponseDTO;
+import io.github.appleaww.messenger.model.dto.response.ChatCreateResponseDTO;
 import io.github.appleaww.messenger.model.dto.ParticipantDTO;
 import io.github.appleaww.messenger.model.entity.Chat;
 import io.github.appleaww.messenger.model.entity.User;

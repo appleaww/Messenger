@@ -1,14 +1,14 @@
-package io.github.appleaww.messenger.model.dto;
+package io.github.appleaww.messenger.model.dto.response;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 public record MessageCreateResponseDTO(
-        Long id,
+        Long messageId,
         Instant sendingTime,
         String content,
         boolean isRead,
         Long senderId,
+        Long recipientId,
         Long chatId
 ) {}
 

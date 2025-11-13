@@ -41,3 +41,6 @@ build/
 ### Логи ###
 *.log
 logs/
+
+###Фронт###
+websocket-test.html

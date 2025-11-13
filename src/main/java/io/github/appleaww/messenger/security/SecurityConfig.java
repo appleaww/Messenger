@@ -31,7 +31,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception{
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/register", "/auth/login").permitAll()//доступ всем
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers("/websocket/**").permitAll()//доступ всем
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")//доступ на все пути начинающиеся на /api/admin и доступ разрешен только с ролью админ
                         .anyRequest().authenticated())//все запросы которые не прошли проверку выше требуют аутентификации
                 .sessionManagement(session ->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -48,7 +49,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -60,27 +61,4 @@ public class SecurityConfig {
     }
 
 }
-//@Bean
-//public CorsConfigurationSource corsConfigurationSource() {
-//    CorsConfiguration configuration = new CorsConfiguration();
-//
-//    // Конкретный домен продакшена
-//    configuration.setAllowedOrigins(List.of("https://messenger.com"));
-//
-//    // Только нужные методы
-//    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//
-//    // Можно оставить "*" или явный список (без разницы для безопасности)
-//    configuration.setAllowedHeaders(List.of(
-//            "Authorization",
-//            "Content-Type"
-//    ));
-//
-//    configuration.setAllowCredentials(true);
-//    configuration.setMaxAge(3600L);  // оптимизация
-//
-//    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//    source.registerCorsConfiguration("/**", configuration);
-//
-//    return source;
-//} ДЛЯ ПРОДАКШЕНА
+

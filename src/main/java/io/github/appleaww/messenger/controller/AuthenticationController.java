@@ -1,8 +1,8 @@
 package io.github.appleaww.messenger.controller;
 
-import io.github.appleaww.messenger.model.dto.AuthenticationResponse;
-import io.github.appleaww.messenger.model.dto.LoginRequestDTO;
-import io.github.appleaww.messenger.model.dto.RegisterRequestDTO;
+import io.github.appleaww.messenger.model.dto.response.AuthenticationResponse;
+import io.github.appleaww.messenger.model.dto.request.LoginRequestDTO;
+import io.github.appleaww.messenger.model.dto.request.RegisterRequestDTO;
 import io.github.appleaww.messenger.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
