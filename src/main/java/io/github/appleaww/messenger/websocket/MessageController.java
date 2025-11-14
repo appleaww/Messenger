@@ -12,9 +12,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,16 +25,16 @@ public class MessageController {
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(
-            @Payload MessageCreateRequestDTO messageCreateRequestDTO
-            ){
+            @Payload MessageCreateRequestDTO messageCreateRequestDTO,
+            Principal principal){
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal)) {
-            log.error("No authentication found in SecurityContext");
+        if(principal == null){
+            log.error("User principal is null");
             return;
         }
 
-        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        Authentication authentication = (Authentication) principal;
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         MessageCreateResponseDTO messageCreateResponseDTO = messageService.createMessage(messageCreateRequestDTO, userPrincipal.getUser());
 
@@ -57,7 +57,13 @@ public class MessageController {
     @MessageMapping("/chat.readMessages")
     public void markMessagesAsRead(
             @Payload ReadReceiptRequestDTO readReceiptRequestDTO,
-            @AuthenticationPrincipal UserPrincipal userPrincipal){
+            Principal principal){
+        if (principal == null) {
+            log.error("Principal is null");
+            return;
+        }
+        Authentication authentication = (Authentication) principal;
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         ReadReceiptResponseDTO readReceiptResponseDTO = messageService.processReadReceipt(readReceiptRequestDTO, userPrincipal.getUser());
         messagingTemplate.convertAndSendToUser(
@@ -73,7 +79,9 @@ public class MessageController {
     @MessageMapping("/chat.typing")
     public void displayTypingProcess(
             @Payload TypingDTO typingDTO,
-            @AuthenticationPrincipal UserPrincipal userPrincipal){
+            Principal principal){
+        Authentication authentication = (Authentication) principal;
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         TypingDTO typingResponseDTO = messageService.processTyping(typingDTO, userPrincipal.getUser());
 
         messagingTemplate.convertAndSendToUser(

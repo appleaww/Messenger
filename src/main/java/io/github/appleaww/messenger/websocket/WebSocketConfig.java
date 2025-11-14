@@ -1,6 +1,6 @@
 package io.github.appleaww.messenger.websocket;
 
-import io.github.appleaww.messenger.security.JwtTokenProvider;
+import io.github.appleaww.messenger.exception.WebSocketExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -14,16 +14,24 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final AuthChannelInterceptor authChannelInterceptor;
+    private final WebSocketExceptionHandler webSocketExceptionHandler;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config){
-        config.enableSimpleBroker("/topic", "/user");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
         registry.addEndpoint("/websocket")
-                .setAllowedOriginPatterns("*");//для продакшена конкретные домены
+                .setAllowedOriginPatterns("*")//для продакшена конкретные домены
+                .withSockJS();
+
+        registry.addEndpoint("/websocket")
+                .setAllowedOriginPatterns("*");
+
+        registry.setErrorHandler(webSocketExceptionHandler);
 
     }
     @Override

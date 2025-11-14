@@ -10,15 +10,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
+    @Transactional
     public void register(RegisterRequestDTO registerRequestDTO){
         if(userRepository.existsByEmail(registerRequestDTO.email())){
             throw new RuntimeException("user with the email " + registerRequestDTO.email() + " already exist");
@@ -40,6 +45,7 @@ public class AuthenticationService {
         log.debug("User has registered with the email {}", registerRequestDTO.email());
     }
 
+    @Transactional(readOnly = true)
     public AuthenticationResponse login(LoginRequestDTO loginRequestDTO){
         User user = userRepository.findByEmail(loginRequestDTO.email())
                 .orElseThrow(()->new EntityNotFoundException("User with the email "+ loginRequestDTO.email() + " does not exist"));
