@@ -12,7 +12,7 @@ import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.ChatRepository;
 import io.github.appleaww.messenger.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
