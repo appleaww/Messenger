@@ -1,46 +1,81 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# =========================
+# Java / Backend
+backend/target/
+backend/*.jar
+backend/*.war
+backend/*.ear
+backend/*.tmp
+backend/*.log
+backend/logs/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Maven
+backend/.mvn/
+!backend/.mvn/wrapper/maven-wrapper.jar
+!backend/.mvn/wrapper/maven-wrapper.properties
+backend/mvnw.cmd
+backend/mvnw
 
-### IntelliJ IDEA ###
-.idea
+# =========================
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+# Build
+frontend/build/
+frontend/.nuxt/
+frontend/.output/
+
+# =========================
+# IDE
+# IntelliJ
+.idea/
 *.iws
 *.iml
 *.ipr
+out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
+*.code-workspace
 
-### Maven Wrapper ###
-!mvnw
-!mvnw.cmd
-.mvn/
-!.mvn/wrapper/
+# Other editors
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-### Логи ###
-*.log
+# =========================
+# OS / System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*~
+
+# =========================
+# Docker
+.docker/
+*.docker
+
+# =========================
+# Common logs
+# =========================
 logs/
-
-###Фронт###
-websocket-test.html
+*.log
