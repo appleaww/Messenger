@@ -139,6 +139,17 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArguments>
+                        -Djava.net.preferIPv4Stack=true
+                        -Djava.net.preferIPv6Addresses=false
+                    </jvmArguments>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

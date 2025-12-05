@@ -1,8 +1,9 @@
-version: '3.8'
-
 services:
+
   kafka:
-    image: 'bitnami/kafka:latest'
+    image: 'bitnamilegacy/kafka:latest'
+    container_name: kafka
+    restart: always
     ports:
       - '9092:9092'
     environment:
@@ -14,3 +15,44 @@ services:
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093"
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_NUM_PARTITIONS: 3
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:17
+    container_name: messenger_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: flyway
+    command: migrate
+    volumes:
+      - ./migrations:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+      FLYWAY_BASELINE_ON_MIGRATE: true
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
+

@@ -68,11 +68,7 @@ ehthumbs.db
 Thumbs.db
 *.swp
 *~
-
-# =========================
-# Docker
-.docker/
-*.docker
+.env
 
 # =========================
 # Common logs
