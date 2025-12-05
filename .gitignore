@@ -7,6 +7,7 @@ backend/*.ear
 backend/*.tmp
 backend/*.log
 backend/logs/
+backend/src/main/resources/application.properties
 
 # Maven
 backend/.mvn/
