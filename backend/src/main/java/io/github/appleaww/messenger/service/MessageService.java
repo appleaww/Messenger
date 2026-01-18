@@ -37,8 +37,9 @@ public class MessageService {
 
         Chat chat = chatRepository.findById(messageCreateRequestDTO.chatId())
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + messageCreateRequestDTO.chatId()));
+
         if (!chat.getParticipants().contains(sender)) {
-            throw new IllegalArgumentException("Chat with id " + messageCreateRequestDTO.chatId() + "does not contain user with id " + sender.getId());
+            throw new IllegalArgumentException("Chat with id " + messageCreateRequestDTO.chatId() + " does not contain user with id " + sender.getId());
         }
 
         User recipient = chat.getParticipants().stream()
@@ -52,9 +53,9 @@ public class MessageService {
         message.setSendingTime(Instant.now());
         message.setChat(chat);
 
-        chat.getMessages().add(message);
+        message = messageRepository.save(message);
 
-        log.debug("Message saved in chat with id {} by User with id {}",message.getId(), sender.getId());
+        log.debug("Message saved in chat with id {} by User with id {}", message.getId(), sender.getId());
 
         return new MessageCreateResponseDTO(
                 message.getId(),
@@ -65,8 +66,8 @@ public class MessageService {
                 recipient.getId(),
                 chat.getId()
         );
-
     }
+
 
     @Transactional
     public ReadReceiptResponseDTO processReadReceipt(ReadReceiptRequestDTO readReceiptRequestDTO, User user){
@@ -123,7 +124,7 @@ public class MessageService {
                 typingUser.getId(),
                 typingUser.getUsername(),
                 recipient.getId(),
-                true
+                typingDTO.isTyping()
         );
 
     }

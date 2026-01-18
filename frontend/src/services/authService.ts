@@ -22,7 +22,13 @@ export const authService = {
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+                username: data.username,
+                name: data.name,
+                password: data.password,
+                email: data.email,
+                role: 'USER'
+            }),
         });
 
         if (!response.ok) {
@@ -31,6 +37,19 @@ export const authService = {
         }
 
         return response.text();
+    },
+
+    saveUserData(name: string, email: string): void {
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', email);
+    },
+
+    getUserName(): string{
+        return localStorage.getItem('userName') || '';
+    },
+
+    getUserEmail(): string{
+        return localStorage.getItem('userEmail') || '';
     },
 
     saveToken(token: string): void {
@@ -53,6 +72,8 @@ export const authService = {
     logout(): void {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
     },
 
     isAuthenticated(): boolean {

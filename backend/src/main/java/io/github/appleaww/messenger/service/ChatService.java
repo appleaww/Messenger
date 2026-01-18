@@ -110,13 +110,13 @@ public class ChatService {
 
                     return new ChatListItemDTO(
                             chat.getId(),
-                            (companion != null ? companion.getName() : "Unknown"),
+                            companion != null ? companion.getId() : null,
+                            companion != null ? companion.getName() : "Unknown",
                             lastMessageContent,
                             lastMessageSendingTime,
                             unreadMessagesCount
                     );
-
-                }).sorted(Comparator.comparing(ChatListItemDTO::lastMessage).reversed()).collect(Collectors.toList());
+                }).sorted(Comparator.comparing(ChatListItemDTO::lastMessageSendingTime).reversed()).collect(Collectors.toList());
 
     }
     @Transactional
@@ -136,7 +136,7 @@ public class ChatService {
         log.debug("Chat with id {} deleted by User with id {}", chat.getId(), user.getId());
         return getAllUserChatsWithDetails(user);
     }
-
+    @Transactional
     public ChatDetailDTO openChat(Long chatId, User user){
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));

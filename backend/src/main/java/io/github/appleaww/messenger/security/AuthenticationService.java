@@ -57,6 +57,6 @@ public class AuthenticationService {
         String token = jwtTokenProvider.generateToken(user);
 
         log.debug("User has logged in with the email {}", user.getEmail());
-        return new AuthenticationResponse(token,user.getId(),user.getRole().toString());
+        return new AuthenticationResponse(token,user.getId(),user.getRole().toString(),user.getName(),user.getEmail());
     }
 }

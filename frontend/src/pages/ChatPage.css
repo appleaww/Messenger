@@ -1,0 +1,107 @@
+.chat-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #99ecff;
+}
+
+
+.chat-main-area {
+    flex: 0 1 890px;
+    display: flex;
+    flex-direction: column;
+    background: #99ecff;
+    height: 100vh;
+    max-height: 1000px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: url(src/components/ui/ChatHeader.png) center/cover;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    max-width: 890px;
+    margin: 0 auto;
+    width: 100%;
+    background: url(src/components/ui/blue-colorful-leaves-with-copy-space.jpg) center/cover;
+    background-attachment: fixed;
+
+}
+
+.chat-empty-messages {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: url(src/components/ui/InputArea.png) center/cover;
+    max-width: 890px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.chat-page-loading,
+.chat-page-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 1rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

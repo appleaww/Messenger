@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AppleHelloEnglishEffect } from '../components/ui/AppleHelloEffect';
 import { authService } from '../services/authService';
-import '../components/auth/AuthPage.css';
+import './AuthPage.css';
 interface AuthPageProps {
     onLoginSuccess?: () => void;
 }
@@ -25,6 +25,7 @@ function AuthPage({ onLoginSuccess }: AuthPageProps) {
             const response = await authService.login({ email, password });
             authService.saveToken(response.token);
             authService.saveUserId(response.userId);
+            authService.saveUserData(response.name, response.email);
             onLoginSuccess?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка входа');
@@ -39,7 +40,7 @@ function AuthPage({ onLoginSuccess }: AuthPageProps) {
         setLoading(true);
 
         try {
-            await authService.register({ username, name, password, email });
+            await authService.register({ username, name, password, email, role: 'USER' });
             setSuccess('Регистрация успешна! Теперь войдите.');
             setIsLogin(true);
         } catch (err) {
