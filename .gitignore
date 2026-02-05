@@ -26,6 +26,13 @@ frontend/.env.local
 frontend/.env.production
 frontend/.env.development
 
+# =========================
+# Analytics
+analytics/.idea
+analytics/.venv
+analytics/analytics.iml
+
+
 # Logs
 frontend/npm-debug.log*
 frontend/yarn-debug.log*

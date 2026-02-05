@@ -1,5 +1,7 @@
 package io.github.appleaww.messenger.websocket;
 
+import io.github.appleaww.messenger.kafka.KafkaProducerService;
+import io.github.appleaww.messenger.kafka.metrics.event.BusinessEvent;
 import io.github.appleaww.messenger.model.dto.TypingDTO;
 import io.github.appleaww.messenger.model.dto.request.MessageCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.request.ReadReceiptRequestDTO;
@@ -15,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,13 +25,14 @@ import java.security.Principal;
 public class MessageController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
+    private final KafkaProducerService kafkaProducerService;
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(
             @Payload MessageCreateRequestDTO messageCreateRequestDTO,
-            Principal principal){
+            Principal principal) {
 
-        if(principal == null){
+        if (principal == null) {
             log.error("User principal is null");
             return;
         }
@@ -52,12 +56,20 @@ public class MessageController {
 
         log.debug("Message sent from User with id {} to User with id {}",
                 messageCreateResponseDTO.senderId(), messageCreateResponseDTO.recipientId());
+
+        BusinessEvent event = new BusinessEvent(
+                "user_active",
+                userPrincipal.getUser().getId().toString(),
+                null,
+                LocalDateTime.now()
+        );
+        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
     }
 
     @MessageMapping("/chat.readMessages")
     public void markMessagesAsRead(
             @Payload ReadReceiptRequestDTO readReceiptRequestDTO,
-            Principal principal){
+            Principal principal) {
         if (principal == null) {
             log.error("Principal is null");
             return;
@@ -74,12 +86,20 @@ public class MessageController {
         log.debug("User with id {} read messages in chat with id {} ",
                 userPrincipal.getUser().getId(), readReceiptResponseDTO.chatId());
 
+        BusinessEvent event = new BusinessEvent(
+                "user_active",
+                userPrincipal.getUser().getId().toString(),
+                null,
+                LocalDateTime.now()
+        );
+        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
+
     }
 
     @MessageMapping("/chat.typing")
     public void displayTypingProcess(
             @Payload TypingDTO typingDTO,
-            Principal principal){
+            Principal principal) {
         Authentication authentication = (Authentication) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         TypingDTO typingResponseDTO = messageService.processTyping(typingDTO, userPrincipal.getUser());

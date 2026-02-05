@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "analytics"
+version = "0.1.0"
+description = ""
+authors = ["appleaww <artemmorozz2006@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pandas = "^2.2.0"
+streamlit = "^1.53.1"
+fastapi = "^0.128.0"
+uvicorn = "^0.40.0"
+confluent-kafka = "^2.5.3"
+numpy = "^2.4.1"
+clickhouse-driver = "^0.2.10"
+clickhouse-sqlalchemy = "^0.3.0"
+sqlalchemy = "^2.0"
+prometheus-client = "^0.24.1"
+psycopg2-binary = "^2.9.11"
+plotly = "^6.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

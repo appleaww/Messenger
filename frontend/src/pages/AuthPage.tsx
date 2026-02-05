@@ -97,16 +97,16 @@ function AuthPage({ onLoginSuccess }: AuthPageProps) {
                     <form className="auth-form" onSubmit={handleRegister}>
                         <input
                             type="text"
-                            placeholder="Имя пользователя"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             required
                         />
                         <input
                             type="text"
-                            placeholder="Имя"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             required
                         />
                         <input
@@ -118,7 +118,7 @@ function AuthPage({ onLoginSuccess }: AuthPageProps) {
                         />
                         <input
                             type="password"
-                            placeholder="Пароль"
+                            placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required

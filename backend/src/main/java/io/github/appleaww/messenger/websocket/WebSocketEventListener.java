@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
@@ -16,8 +17,9 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 public class WebSocketEventListener {
     private final OnlineStatusService onlineStatusService;
 
+    @Async
     @EventListener
-    public void HandleWebSocketConnectListener(SessionConnectedEvent event){
+    public void HandleWebSocketConnectListener(SessionConnectedEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         if (headerAccessor.getUser() instanceof UsernamePasswordAuthenticationToken auth) {
@@ -25,10 +27,15 @@ public class WebSocketEventListener {
                 Long userId = userPrincipal.getUserId();
                 onlineStatusService.userConnected(userId);
                 log.info("User with id {} connected", userId);
+            } else {
+                log.warn("Principal is not UserPrincipal for connect event");
             }
+        } else {
+            log.debug("No authentication for connect event - skipping");
         }
     }
 
+    @Async
     @EventListener
     public void HandleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -38,7 +45,11 @@ public class WebSocketEventListener {
                 Long userId = userPrincipal.getUserId();
                 onlineStatusService.userDisconnected(userId);
                 log.info("User with id {} disconnected", userId);
+            } else {
+                log.warn("Principal is not UserPrincipal for disconnect event");
             }
+        } else {
+            log.debug("No authentication for disconnect event - skipping");
         }
     }
 }

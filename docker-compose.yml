@@ -1,20 +1,153 @@
 services:
-
   kafka:
-    image: 'bitnamilegacy/kafka:latest'
+    image: confluentinc/cp-kafka:latest
     container_name: kafka
     restart: always
     ports:
-      - '9092:9092'
+      - '19092:19092'
     environment:
-      KAFKA_CFG_NODE_ID: 0
-      KAFKA_CFG_PROCESS_ROLES: "controller,broker"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093"
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CFG_NUM_PARTITIONS: 3
+      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: "BROKER://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "BROKER://kafka:9092,EXTERNAL://localhost:19092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093,1@kafka2:9093,2@kafka3:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_JVM_PERFORMANCE_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: [ "CMD-SHELL", "echo > /dev/tcp/localhost/9092 || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - app-network
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka2
+    restart: always
+    ports:
+      - '29092:29092'
+    environment:
+      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: "BROKER://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "BROKER://kafka2:9092,EXTERNAL://localhost:29092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093,1@kafka2:9093,2@kafka3:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_JVM_PERFORMANCE_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: [ "CMD-SHELL", "echo > /dev/tcp/localhost/9092 || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - kafka2_data:/var/lib/kafka/data
+    networks:
+      - app-network
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka3
+    restart: always
+    ports:
+      - '39092:39092'
+    environment:
+      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: "BROKER://0.0.0.0:9092,EXTERNAL://0.0.0.0:39092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "BROKER://kafka3:9092,EXTERNAL://localhost:39092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "BROKER:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "0@kafka:9093,1@kafka2:9093,2@kafka3:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "BROKER"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_JVM_PERFORMANCE_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: [ "CMD-SHELL", "echo > /dev/tcp/localhost/9092 || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - kafka3_data:/var/lib/kafka/data
+    networks:
+      - app-network
+
+  analytics_db:
+    image: clickhouse/clickhouse-server:24.1
+    container_name: analytics_db
+    restart: always
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    volumes:
+      - analytics_data:/var/lib/clickhouse
+    networks:
+      - app-network
+
+  analytics:
+    build: ./analytics
+    container_name: analytics
+    restart: always
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_HOST: analytics_db:8123
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092,kafka2:9092,kafka3:9092
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  analytics_streamlit:
+    build: ./analytics
+    container_name: analytics_streamlit_dashboards
+    command: streamlit run src/dashboard.py --server.port=8501 --server.address=0.0.0.0 --server.enableCORS=false --server.enableXsrfProtection=false
+    ports:
+      - "8501:8501"
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_HOST: analytics_db:8123
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092,kafka2:9092,kafka3:9092
+    depends_on:
+      - analytics_db
     networks:
       - app-network
 
@@ -28,7 +161,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -49,8 +181,13 @@ services:
       - postgres
     networks:
       - app-network
+
 volumes:
   postgres_data:
+  kafka_data:
+  kafka2_data:
+  kafka3_data:
+  analytics_data:
 
 networks:
   app-network:
