@@ -76,7 +76,7 @@ public class MessageService {
                 latencyMs,
                 null,
                 null,
-               null,
+                null,
                 LocalDateTime.now()
         );
 
