@@ -9,9 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 public class MessengerApplication {
-
     static void main(String[] args) {
         SpringApplication.run(MessengerApplication.class, args);
     }
-
 }

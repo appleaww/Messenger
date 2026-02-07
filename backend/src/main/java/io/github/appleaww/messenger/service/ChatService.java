@@ -174,5 +174,4 @@ public class ChatService {
                 messages);
 
     }
-    //запушить в гит, начать реализацию веб соекета
 }

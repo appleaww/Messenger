@@ -35,7 +35,6 @@ function App() {
 
     const handleBackToChats = useCallback(() => {
         setActiveChatId(null);
-        // Триггерим обновление списка чатов
         setRefreshKey(prev => prev + 1);
     }, []);
 
