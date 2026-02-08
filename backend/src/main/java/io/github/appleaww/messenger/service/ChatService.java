@@ -53,7 +53,7 @@ public class ChatService {
         chat.getChatNames().put(companion.getId(), initiator.getName());
         chat.setLastMessage("Send the first message!");
 
-        chatRepository.save(chat);
+        chat = chatRepository.save(chat);
 
         log.debug("Chat created with id {}", chat.getId());
         return chatMapper.toDTO(chat, companion);
@@ -119,6 +119,7 @@ public class ChatService {
                 }).sorted(Comparator.comparing(ChatListItemDTO::lastMessageSendingTime).reversed()).collect(Collectors.toList());
 
     }
+
     @Transactional
     public List<ChatListItemDTO> deleteChat(Long chatId, User user){
         Chat chat = chatRepository.findById(chatId)
@@ -136,6 +137,7 @@ public class ChatService {
         log.debug("Chat with id {} deleted by User with id {}", chat.getId(), user.getId());
         return getAllUserChatsWithDetails(user);
     }
+
     @Transactional
     public ChatDetailDTO openChat(Long chatId, User user){
         Chat chat = chatRepository.findById(chatId)
