@@ -28,9 +28,7 @@ public class MessageController {
     private final KafkaProducerService kafkaProducerService;
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(
-            @Payload MessageCreateRequestDTO messageCreateRequestDTO,
-            Principal principal) {
+    public void sendMessage(@Payload MessageCreateRequestDTO messageCreateRequestDTO, Principal principal) {
 
         if (principal == null) {
             log.error("User principal is null");
@@ -67,9 +65,7 @@ public class MessageController {
     }
 
     @MessageMapping("/chat.readMessages")
-    public void markMessagesAsRead(
-            @Payload ReadReceiptRequestDTO readReceiptRequestDTO,
-            Principal principal) {
+    public void markMessagesAsRead(@Payload ReadReceiptRequestDTO readReceiptRequestDTO, Principal principal) {
         if (principal == null) {
             log.error("Principal is null");
             return;
@@ -97,9 +93,7 @@ public class MessageController {
     }
 
     @MessageMapping("/chat.typing")
-    public void displayTypingProcess(
-            @Payload TypingDTO typingDTO,
-            Principal principal) {
+    public void displayTypingProcess(@Payload TypingDTO typingDTO, Principal principal) {
         Authentication authentication = (Authentication) principal;
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         TypingDTO typingResponseDTO = messageService.processTyping(typingDTO, userPrincipal.getUser());

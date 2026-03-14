@@ -21,10 +21,8 @@ public class SystemMetricsPublisher {
     @Scheduled(fixedRate = 30000)
     public void publishSystemMetrics(){
         Double cpuUsage = Objects.requireNonNull(meterRegistry.find("process.cpu.usage").gauge()).value();
-        Double memoryUsed = Objects.requireNonNull(meterRegistry.find("jvm.memory.used")
-                        .tags("area", "heap")
-                        .gauge())
-                .value();
+        Double memoryUsed = Objects.requireNonNull(meterRegistry.find("jvm.memory.used").tags("area", "heap")
+                        .gauge()).value();
 
         TechnicalEvent event = new TechnicalEvent(
                 "system_metrics",

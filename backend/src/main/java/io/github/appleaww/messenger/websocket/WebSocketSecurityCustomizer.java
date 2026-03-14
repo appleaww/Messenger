@@ -22,7 +22,6 @@ public class WebSocketSecurityCustomizer extends AbstractSecurityWebSocketMessag
                         SimpMessageType.UNSUBSCRIBE,
                         SimpMessageType.MESSAGE
                 ).authenticated()
-
                 .anyMessage().authenticated();
     }
 

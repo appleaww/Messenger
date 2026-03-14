@@ -5,15 +5,16 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "users", schema = "public")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"chats", "messages"})
-@EqualsAndHashCode(exclude = {"chats", "messages"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,5 +50,24 @@ public class User {
 
     public enum Role {
         ADMIN, USER
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User)o;
+        if (id != null) {
+            return Objects.equals(id, user.id);
+        } else if (user.id != null) {
+            return false;
+        } else {
+            return Objects.equals(username, user.username);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return (id != null) ? Objects.hashCode(id) : Objects.hashCode(username);
     }
 }

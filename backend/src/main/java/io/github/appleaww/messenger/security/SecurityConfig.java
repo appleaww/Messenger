@@ -34,11 +34,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/register",
-                                "/auth/login",
-                                "/websocket/**"
-                        ).permitAll()//доступ всем
+                        .requestMatchers("/auth/register", "/auth/login", "/websocket/**").permitAll()//доступ всем
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")//доступ на все пути начинающиеся на /api/admin и доступ разрешен только с ролью админ
                         .anyRequest().authenticated())//все запросы которые не прошли проверку выше требуют аутентификации
                 .sessionManagement(session ->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -68,12 +64,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
     }
-
-
-
 }
 

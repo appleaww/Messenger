@@ -57,7 +57,6 @@ public class ChatService {
 
         log.debug("Chat created with id {}", chat.getId());
         return chatMapper.toDTO(chat, companion);
-
     }
     
     @Transactional

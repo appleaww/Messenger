@@ -99,12 +99,6 @@ public class OnlineStatusService {
         return Set.copyOf(onlineUsers);
     }
 
-    public OnlineStatusDTO getStatus(Long userId){
-        boolean isOnline = isUserOnline(userId);
-        Instant lastSeen = isOnline ? Instant.now() : userRepository.findById(userId).map(User::getLastSeen).orElse(null);
-        return new OnlineStatusDTO(userId, isOnline, lastSeen);
-    }
-
     private void broadcastStatus(Long userId, boolean isOnline){
         Instant lastSeen = isOnline ? Instant.now() : userRepository.findById(userId).map(User::getLastSeen).orElse(Instant.now());
 
@@ -113,13 +107,6 @@ public class OnlineStatusService {
         simpMessagingTemplate.convertAndSend("/topic/online-status", status);
     }
 
-    public void notifyUserAboutStatus(Long recipientId, Long targetUserId) {
-        OnlineStatusDTO status = getStatus(targetUserId);
-        simpMessagingTemplate.convertAndSendToUser(
-                recipientId.toString(),
-                "/queue/online-status",
-                status
-        );
-    }
+
 
 }

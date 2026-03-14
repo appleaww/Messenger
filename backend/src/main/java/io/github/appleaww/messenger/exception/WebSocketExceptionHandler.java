@@ -16,9 +16,7 @@ import java.nio.charset.StandardCharsets;
 public class WebSocketExceptionHandler extends StompSubProtocolErrorHandler {
 
     @Override
-    public Message<byte[]> handleClientMessageProcessingError(
-            Message<byte[]> clientMessage,
-            Throwable exception) {
+    public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable exception) {
 
         log.error("WebSocket error: {}", exception.getMessage(), exception);
 
