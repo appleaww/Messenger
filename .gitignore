@@ -8,6 +8,7 @@ backend/*.tmp
 backend/*.log
 backend/logs/
 backend/src/main/resources/application.properties
+opentelemetry-javaagent.jar
 
 # Maven
 backend/.mvn/
