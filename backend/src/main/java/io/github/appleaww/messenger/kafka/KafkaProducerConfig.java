@@ -55,22 +55,23 @@ public class KafkaProducerConfig {
         return new KafkaAdmin(configs);
     }
 
-    @Bean
-    public NewTopic businessMetricsTopic(){
-        Map<String, String> topicConfigs = new HashMap<>();
-        topicConfigs.put(TopicConfig.RETENTION_MS_CONFIG, "604800000");
-        topicConfigs.put(TopicConfig.COMPRESSION_TYPE_CONFIG,"snappy");
-        topicConfigs.put(TopicConfig.SEGMENT_BYTES_CONFIG, "1073741824");
-        return new NewTopic("business-metrics", 6, (short) 3).configs(topicConfigs);
+    private Map<String, String> defaultMetricTopicConfigs() {
+        Map<String, String> configs = new HashMap<>();
+        configs.put(TopicConfig.RETENTION_MS_CONFIG, "604800000");
+        configs.put(TopicConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+        configs.put(TopicConfig.SEGMENT_BYTES_CONFIG, "1073741824");
+        return configs;
     }
 
     @Bean
-    public NewTopic technicalMetricsTopic(){
-        Map<String, String> topicConfigs = new HashMap<>();
-        topicConfigs.put(TopicConfig.RETENTION_MS_CONFIG, "604800000");
-        topicConfigs.put(TopicConfig.COMPRESSION_TYPE_CONFIG,"snappy");
-        topicConfigs.put(TopicConfig.SEGMENT_BYTES_CONFIG, "1073741824");
-        return new NewTopic("technical-metrics", 6, (short) 3).configs(topicConfigs);
+    public NewTopic businessMetricsTopic() {
+        return new NewTopic("business-metrics", 6, (short) 2)
+                .configs(defaultMetricTopicConfigs());
+    }
 
+    @Bean
+    public NewTopic technicalMetricsTopic() {
+        return new NewTopic("technical-metrics", 6, (short) 2)
+                .configs(defaultMetricTopicConfigs());
     }
 }
