@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: #JavaAgent отправляет все метрики на порт через grpc
+
+  processors: # данные отправляются пакетами, если пакет не наполнился за 2сек - отправляем
+    batch:
+      send_batch_size: 256
+      timeout: 2s
+
+    memory_limiter: # каждые 10сек проверка сколько памяти используем, при использовании 80% памяти замедляем работу
+      check_interval: 10s
+      limit_percentage: 80
+      spike_limit_percentage: 25 # если кол во памяти резко выросло на 25%, то начинаем дропать данные, приоритет важным метрикам
+      # самые старые записи в буфере дропаются в первую очередь так же jvm метрики имеют низкий приоритет
+
+  routing: # используем два правила отбора метрик как в блоке catch - сначала точечно, потом общее
+    attribute_source: resource
+    attribute_key: metric.name
+    table:
+      - value: "messenger.*" # префикс - кастомные метрики
+        exporters: [ kafka_business ]
+
+      - value: "*"  # метрики, которые собираются автоматически
+        exporters: [ kafka_technical ]
+
+  exporters:
+    kafka_business:
+      brokers: ["kafka:9092"]
+      topic: "business-metrics"
+      encoding: otlp_proto
+      protocol_version: "3.0.0"
+
+    kafka_technical:
+      brokers: [ "kafka:9092" ]
+      topic: "technical-metrics"
+      encoding: otlp_proto
+      protocol_version: "3.0.0"
+
+  service: # описываем все что делает коллектор по порядку
+    pipelines:
+      metrics:
+        receivers: [otlp]
+        processors: [batch, routing]
+        exporters: [kafka_business, kafka_technical]
