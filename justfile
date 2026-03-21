@@ -1,5 +1,6 @@
 set dotenv-load := true
 set shell := ["bash", "-uc"]
+FRONTEND_DIR := "frontend"
 
 default:
     @just --list
@@ -51,4 +52,9 @@ build:
 [group('java')]
 package:
     just mvn clean package -DskipTests
+
+#frontend
+[group('frontend')]
+ui:
+   cd {{FRONTEND_DIR}} && exec npm run dev
 
