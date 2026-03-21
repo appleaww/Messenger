@@ -77,6 +77,18 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
     }, [chatId, currentUserId]);
 
     useEffect(() => {
+        if (chatDetail?.companionName) {
+            document.title = `Chat with ${chatDetail.companionName}`;
+        } else {
+            document.title = 'Messenger';
+        }
+
+        return () => {
+            document.title = 'Messenger';
+        };
+    }, [chatDetail]);
+
+    useEffect(() => {
         if (!companionId) return;
 
         const loadOnlineStatus = async () => {
@@ -130,14 +142,20 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
 
         const unsubMessage = websocketService.onMessage((message: WebSocketMessage) => {
             if (message.chatId === chatId) {
-                setMessages(prev => [...prev, {
-                    id: message.id ?? Date.now(),
-                    content: message.content,
-                    sendingTime: message.sendingTime,
-                    senderId: message.senderId,
-                    isRead: message.isRead,
-                    isMine: message.senderId === currentUserId
-                }]);
+                setMessages(prev => {
+                    const newId = message.id ?? Date.now();
+                    if (prev.some(m => m.id === newId)) {
+                        return prev;
+                    }
+                    return [...prev, {
+                        id: newId,
+                        content: message.content,
+                        sendingTime: message.sendingTime,
+                        senderId: message.senderId,
+                        isRead: message.isRead,
+                        isMine: message.senderId === currentUserId
+                    }];
+                });
                 scrollToBottom();
 
                 if (message.senderId !== currentUserId && message.id) {
