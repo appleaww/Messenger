@@ -58,6 +58,9 @@ public class ChatService {
         chat = chatRepository.save(chat);
 
         log.debug("Chat created with id {}", chat.getId());
+
+        meterRegistry.counter("messenger.chats.created","userId", initiator.getId().toString()).increment();
+
         return chatMapper.toDTO(chat, companion);
     }
     
@@ -172,7 +175,7 @@ public class ChatService {
 
         log.debug("Chat with id {} opened by User with id {}", chat.getId(), user.getId());
 
-        meterRegistry.counter("messenger.user.activity", "userId", user.getId().toString(), "activity_type", "chat_opened").increment();
+        meterRegistry.counter("messenger.user.activity", "userId", user.getId().toString(), "action_type", "chat_opened").increment();
 
         return new ChatDetailDTO(chat.getId(),
                 companion.getName(),

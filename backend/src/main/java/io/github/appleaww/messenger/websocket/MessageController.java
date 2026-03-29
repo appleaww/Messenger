@@ -72,8 +72,6 @@ public class MessageController {
         );
         log.debug("User with id {} read messages in chat with id {} ",
                 userPrincipal.getUser().getId(), readReceiptResponseDTO.chatId());
-
-
     }
 
     @MessageMapping("/chat.typing")

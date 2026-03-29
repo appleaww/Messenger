@@ -1,7 +1,5 @@
 package io.github.appleaww.messenger.service;
 
-import io.github.appleaww.messenger.kafka.KafkaProducerService;
-import io.github.appleaww.messenger.kafka.metrics.event.BusinessEvent;
 import io.github.appleaww.messenger.model.dto.OnlineStatusDTO;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.UserRepository;
@@ -30,26 +28,33 @@ public class OnlineStatusService {
     private final SimpUserRegistry simpUserRegistry;
     private final UserRepository userRepository;
     private final MeterRegistry meterRegistry;
+    private final Map<String, LocalDateTime> sessionStartTimes = new ConcurrentHashMap<>();
 
     @Transactional
-    public void userConnected(Long userId){
+    public void userConnected(Long userId) {
         onlineUsers.add(userId);
 
-        userRepository.findById(userId).ifPresent(user ->{
+        userRepository.findById(userId).ifPresent(user -> {
             user.setLastSeen(Instant.now());
             user.setIsOnline(true);
             userRepository.save(user);
         });
+
         broadcastStatus(userId, true);
         log.debug("User with id {} connected. Active sessions: {}", userId, simpUserRegistry.getUserCount());
 
-        meterRegistry.counter("messenger.user.activity", "userId", userId.toString(), "activity_type", "session_started").increment();
+        sessionStartTimes.put(userId.toString(), LocalDateTime.now());
+
+        meterRegistry.counter("messenger.user.activity", "userId", userId.toString(), "action_type", "session_started").increment();
+
+        meterRegistry.counter("messenger.sessions.started", "userId", userId.toString()).increment();
     }
 
     @Transactional
-    public void userDisconnected(Long userId){
+    public void userDisconnected(Long userId) {
         int sessionCount = getSessionCount(userId);
-        if(sessionCount == 0){
+
+        if (sessionCount == 0) {
             onlineUsers.remove(userId);
 
             userRepository.findById(userId).ifPresent(user -> {
@@ -60,32 +65,39 @@ public class OnlineStatusService {
 
             broadcastStatus(userId, false);
             log.debug("User with id {} is now offline", userId);
-        } else{
+        } else {
             log.debug("User with id {} disconnected one session, {} remaining", userId, sessionCount);
+        }
+
+        LocalDateTime startTime = sessionStartTimes.remove(userId.toString());
+        if (startTime != null) {
+            long durationMs = Duration.between(startTime, LocalDateTime.now()).toMillis();
+
+            meterRegistry.summary("messenger.sessions.duration",
+                            "userId", userId.toString())
+                    .record(durationMs);
         }
     }
 
-    private int getSessionCount(Long userId){
+    private int getSessionCount(Long userId) {
         var user = simpUserRegistry.getUser(userId.toString());
-        return user!=null ? user.getSessions().size() : 0;
+        return user != null ? user.getSessions().size() : 0;
     }
 
-    public boolean isUserOnline(Long userId){
+    public boolean isUserOnline(Long userId) {
         return onlineUsers.contains(userId);
     }
 
-    public Set<Long> getOnlineUsers(){
+    public Set<Long> getOnlineUsers() {
         return Set.copyOf(onlineUsers);
     }
 
-    private void broadcastStatus(Long userId, boolean isOnline){
-        Instant lastSeen = isOnline ? Instant.now() : userRepository.findById(userId).map(User::getLastSeen).orElse(Instant.now());
+    private void broadcastStatus(Long userId, boolean isOnline) {
+        Instant lastSeen = isOnline
+                ? Instant.now()
+                : userRepository.findById(userId).map(User::getLastSeen).orElse(Instant.now());
 
         OnlineStatusDTO status = new OnlineStatusDTO(userId, isOnline, lastSeen);
-
         simpMessagingTemplate.convertAndSend("/topic/online-status", status);
     }
-
-
-
 }
