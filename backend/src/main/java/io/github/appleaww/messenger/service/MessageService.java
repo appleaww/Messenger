@@ -35,10 +35,11 @@ public class MessageService {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final KafkaProducerService kafkaProducerService;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public MessageCreateResponseDTO createMessage(MessageCreateRequestDTO messageCreateRequestDTO, User user) {
-       // Timer.Sample sample = Timer.start(meterRegistry);
+        Timer.Sample sample = Timer.start(meterRegistry);
 
         User sender = userRepository.findById(user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id " + user.getId()));
@@ -64,22 +65,10 @@ public class MessageService {
         message = messageRepository.save(message);
         log.debug("Message saved in chat with id {} by User with id {}", message.getId(), sender.getId());
 
-//        Long latencyMs = sample.stop(meterRegistry.timer("messenger.message.send.latency",
-//               Tags.of("chatId", messageCreateRequestDTO.chatId().toString())));
+        meterRegistry.counter("messenger.messages.sent", "userId", sender.getId().toString(), "chatId", chat.getId().toString()).increment();
 
-//       meterRegistry.counter("message.message.sent.throughput").increment();
-
-//        TechnicalEvent event = new TechnicalEvent(
-//               "message_sent",
-//                sender.getId().toString(),
-//                latencyMs,
-//                null,
-//                null,
-//                null,
-//                LocalDateTime.now()
-//        );
-
-//        kafkaProducerService.sendMessage("technical-metrics", sender.getId().toString(), event);
+        sample.stop(meterRegistry.timer("messenger.messages.send.latency", "userId", sender.getId().toString(),
+                "chatId", messageCreateRequestDTO.chatId().toString()));
 
         return new MessageCreateResponseDTO(
                 message.getId(),
