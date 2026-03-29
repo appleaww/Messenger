@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-//@Component
-//@Slf4j
-//@RequiredArgsConstructor
-//public class SystemMetricsPublisher {
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class SystemMetricsPublisher {
 //    private final KafkaProducerService kafkaProducerService;
 //    private final MeterRegistry meterRegistry;
 //
@@ -37,4 +37,4 @@ import java.util.Objects;
 //
 //        log.debug("System metrics sent: CPU={}, Memory={}", cpuUsage, memoryUsed);
 //    }
-//}
+}

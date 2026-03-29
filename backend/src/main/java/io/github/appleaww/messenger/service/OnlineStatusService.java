@@ -5,6 +5,7 @@ import io.github.appleaww.messenger.kafka.metrics.event.BusinessEvent;
 import io.github.appleaww.messenger.model.dto.OnlineStatusDTO;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.UserRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,7 @@ public class OnlineStatusService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SimpUserRegistry simpUserRegistry;
     private final UserRepository userRepository;
-    private final KafkaProducerService kafkaProducerService;
-
-    private final Map<String, LocalDateTime> sessionStartTimes = new ConcurrentHashMap<>();
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public void userConnected(Long userId){
@@ -44,15 +43,7 @@ public class OnlineStatusService {
         broadcastStatus(userId, true);
         log.debug("User with id {} connected. Active sessions: {}", userId, simpUserRegistry.getUserCount());
 
-        BusinessEvent activeEvent = new BusinessEvent(
-                "user_active",
-                userId.toString(),
-                null,
-                LocalDateTime.now()
-        );
-
-        kafkaProducerService.sendMessage("business-metrics", activeEvent.userId(), activeEvent);
-        sessionStartTimes.put(userId.toString(), LocalDateTime.now());
+        meterRegistry.counter("messenger.user.activity", "userId", userId.toString(), "activity_type", "session_started").increment();
     }
 
     @Transactional
@@ -69,18 +60,6 @@ public class OnlineStatusService {
 
             broadcastStatus(userId, false);
             log.debug("User with id {} is now offline", userId);
-
-            LocalDateTime startTime = sessionStartTimes.remove(userId.toString());
-            if(startTime != null){
-                long durationMs = Duration.between(startTime,LocalDateTime.now()).toMillis();
-                BusinessEvent sessionEvent = new BusinessEvent(
-                        "session_end",
-                        userId.toString(),
-                        durationMs,
-                        LocalDateTime.now()
-                );
-                kafkaProducerService.sendMessage("business-metrics", sessionEvent.userId(), sessionEvent);
-            }
         } else{
             log.debug("User with id {} disconnected one session, {} remaining", userId, sessionCount);
         }

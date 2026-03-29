@@ -11,6 +11,7 @@ import io.github.appleaww.messenger.model.entity.Message;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.ChatRepository;
 import io.github.appleaww.messenger.repository.UserRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final ChatMapper chatMapper;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public ChatCreateResponseDTO createChat(ChatCreateRequestDTO chatCreateRequestDTO, User initiator) {
@@ -169,6 +171,9 @@ public class ChatService {
                 )).toList();
 
         log.debug("Chat with id {} opened by User with id {}", chat.getId(), user.getId());
+
+        meterRegistry.counter("messenger.user.activity", "userId", user.getId().toString(), "activity_type", "chat_opened").increment();
+
         return new ChatDetailDTO(chat.getId(),
                 companion.getName(),
                 companion.getUsername(),

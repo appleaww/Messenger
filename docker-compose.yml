@@ -113,7 +113,7 @@ services:
       - OTEL_METRICS_EXPORTER=otlp
       - OTEL_TRACES_EXPORTER=none
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_METRIC_EXPORT_INTERVAL=10000
+      - OTEL_METRIC_EXPORT_INTERVAL=15000
       - OTEL_INSTRUMENTATION_MICROMETER_ENABLED=true
     depends_on:
       otel-collector:

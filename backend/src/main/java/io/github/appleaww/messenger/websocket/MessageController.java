@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 public class MessageController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
-    private final KafkaProducerService kafkaProducerService;
+//    private final KafkaProducerService kafkaProducerService;
 
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload MessageCreateRequestDTO messageCreateRequestDTO, Principal principal) {
@@ -55,13 +55,13 @@ public class MessageController {
         log.debug("Message sent from User with id {} to User with id {}",
                 messageCreateResponseDTO.senderId(), messageCreateResponseDTO.recipientId());
 
-        BusinessEvent event = new BusinessEvent(
-                "user_active",
-                userPrincipal.getUser().getId().toString(),
-                null,
-                LocalDateTime.now()
-        );
-        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
+//        BusinessEvent event = new BusinessEvent(
+//                "user_active",
+//                userPrincipal.getUser().getId().toString(),
+//                null,
+//                LocalDateTime.now()
+//        );
+//        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
     }
 
     @MessageMapping("/chat.readMessages")
@@ -81,14 +81,14 @@ public class MessageController {
         );
         log.debug("User with id {} read messages in chat with id {} ",
                 userPrincipal.getUser().getId(), readReceiptResponseDTO.chatId());
-
-        BusinessEvent event = new BusinessEvent(
-                "user_active",
-                userPrincipal.getUser().getId().toString(),
-                null,
-                LocalDateTime.now()
-        );
-        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
+//
+//        BusinessEvent event = new BusinessEvent(
+//                "user_active",
+//                userPrincipal.getUser().getId().toString(),
+//                null,
+//                LocalDateTime.now()
+//        );
+//        kafkaProducerService.sendMessage("business-metrics", event.userId(), event);
 
     }
 
