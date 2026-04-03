@@ -39,6 +39,9 @@ public class User {
     @Column(name = "is_online", nullable = false)
     private Boolean isOnline = false;
 
+    @Column(name = "is_premium", nullable = false)
+    private Boolean isPremium = false;
+
     @Column(name = "last_seen")
     private Instant lastSeen;
 

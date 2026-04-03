@@ -1,6 +1,4 @@
 package io.github.appleaww.messenger.model.dto.request;
-
-
 import io.github.appleaww.messenger.model.entity.User;
 
 public record RegisterRequestDTO(String username,
