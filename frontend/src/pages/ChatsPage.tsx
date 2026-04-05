@@ -6,6 +6,7 @@ import type { ChatListItem as ChatListItemType } from '../services/chatService';
 import './ChatsPage.css';
 import {authService} from "@/services/authService.ts";
 import {websocketService, WebSocketMessage} from "@/services/websocketService.ts";
+import { subscriptionService } from '../services/chatService';
 
 
 interface ChatsPageProps {
@@ -22,6 +23,9 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
     const [creating, setCreating] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
+    const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+    const [subscriptionTier, setSubscriptionTier] = useState<'BASIC' | 'PREMIUM'>('BASIC');
+    const [subscribing, setSubscribing] = useState(false);
 
     const currentUserId = authService.getUserId();
 
@@ -132,12 +136,24 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
                 <div className="chats-container">
                     <div className="chats-header">
                         <h1>Все чаты</h1>
-                        <button
-                            className="new-chat-btn"
-                            onClick={() => setShowNewChatModal(true)}
-                        >
-                            Создать новый чат
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                className="new-chat-btn"
+                                onClick={() => setShowNewChatModal(true)}
+                            >
+                                Создать новый чат
+                            </button>
+                            <button
+                                className="new-chat-btn"
+                                style={{
+                                    background: 'linear-gradient(135deg, #10b981, #34d399)',
+                                    boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)'
+                                }}
+                                onClick={() => setShowSubscriptionModal(true)}
+                            >
+                                Подписка
+                            </button>
+                        </div>
                     </div>
 
                     {error && <div className="chats-error">{error}</div>}
@@ -204,6 +220,62 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {showSubscriptionModal && (
+                <div className="modal-overlay" onClick={() => setShowSubscriptionModal(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <h2>Управление подпиской</h2>
+
+                        <div style={{
+                            marginBottom: '1.5rem',
+                            padding: '1rem',
+                            background: '#f8fafc',
+                            borderRadius: '12px',
+                            textAlign: 'center'
+                        }}>
+                            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 500, color: '#64748b' }}>
+                                Ваш текущий статус подписки:
+                            </p>
+                            <p style={{
+                                fontSize: '1.25rem',
+                                fontWeight: 700,
+                                color: subscriptionTier === 'PREMIUM' ? '#10b981' : '#64748b'
+                            }}>
+                                {subscriptionTier === 'PREMIUM' ? 'Premium' : 'Basic'}
+                            </p>
+                        </div>
+
+                        {subscriptionTier === 'BASIC' && (
+                            <button
+                                onClick={async () => {
+                                    setSubscribing(true);
+                                    try {
+                                        await subscriptionService.activateSubscription('PREMIUM');
+                                        setSubscriptionTier('PREMIUM');
+                                        alert('Подписка Premium успешно активирована!');
+                                    } catch (err: any) {
+                                        alert(err.message || 'Ошибка активации');
+                                    } finally {
+                                        setSubscribing(false);
+                                    }
+                                }}
+                                disabled={subscribing}
+                                className="submit-btn"
+                                style={{ width: '100%', marginBottom: '1rem' }}
+                            >
+                                {subscribing ? 'Активация...' : 'Активировать Premium подписку'}
+                            </button>
+                        )}
+
+                        <button
+                            onClick={() => setShowSubscriptionModal(false)}
+                            className="cancel-btn"
+                            style={{ width: '100%' }}
+                        >
+                            Закрыть
+                        </button>
                     </div>
                 </div>
             )}

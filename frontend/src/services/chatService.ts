@@ -92,3 +92,19 @@ export const statusService = {
         return response.json();
     }
 };
+export const subscriptionService = {
+    async activateSubscription(tier: 'BASIC' | 'PREMIUM' = 'PREMIUM'): Promise<string> {
+        const response = await fetch(`${API_BASE}/subscribe`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ tier })
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Ошибка активации подписки');
+        }
+
+        return response.text();
+    }
+};
