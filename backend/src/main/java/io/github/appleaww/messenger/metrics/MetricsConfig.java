@@ -1,4 +1,4 @@
-package io.github.appleaww.messenger.kafka;
+package io.github.appleaww.messenger.metrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

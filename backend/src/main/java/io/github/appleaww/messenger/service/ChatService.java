@@ -1,6 +1,7 @@
 package io.github.appleaww.messenger.service;
 
 import io.github.appleaww.messenger.mapper.ChatMapper;
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.request.ChatCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.response.ChatCreateResponseDTO;
 import io.github.appleaww.messenger.model.dto.ChatDetailDTO;
@@ -11,7 +12,6 @@ import io.github.appleaww.messenger.model.entity.Message;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.ChatRepository;
 import io.github.appleaww.messenger.repository.UserRepository;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final ChatMapper chatMapper;
-    private final MeterRegistry meterRegistry;
+    private final MetricsService metricsService;
 
     @Transactional
     public ChatCreateResponseDTO createChat(ChatCreateRequestDTO chatCreateRequestDTO, User initiator) {
@@ -59,7 +59,7 @@ public class ChatService {
 
         log.debug("Chat created with id {}", chat.getId());
 
-        meterRegistry.counter("messenger.chats.created","userId", initiator.getId().toString()).increment();
+        metricsService.chatCreated(initiator.getId().toString());
 
         return chatMapper.toDTO(chat, companion);
     }
@@ -175,7 +175,7 @@ public class ChatService {
 
         log.debug("Chat with id {} opened by User with id {}", chat.getId(), user.getId());
 
-        meterRegistry.counter("messenger.user.activity", "userId", user.getId().toString(), "action_type", "chat_opened").increment();
+        metricsService.activityChatOpened(user.getId().toString());
 
         return new ChatDetailDTO(chat.getId(),
                 companion.getName(),

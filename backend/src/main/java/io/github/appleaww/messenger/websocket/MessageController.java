@@ -1,7 +1,5 @@
 package io.github.appleaww.messenger.websocket;
 
-import io.github.appleaww.messenger.kafka.KafkaProducerService;
-import io.github.appleaww.messenger.kafka.metrics.event.BusinessEvent;
 import io.github.appleaww.messenger.model.dto.TypingDTO;
 import io.github.appleaww.messenger.model.dto.request.MessageCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.request.ReadReceiptRequestDTO;

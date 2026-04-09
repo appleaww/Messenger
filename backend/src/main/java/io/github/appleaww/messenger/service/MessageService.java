@@ -1,7 +1,6 @@
 package io.github.appleaww.messenger.service;
 
-import io.github.appleaww.messenger.kafka.KafkaProducerService;
-import io.github.appleaww.messenger.kafka.metrics.event.TechnicalEvent;
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.TypingDTO;
 import io.github.appleaww.messenger.model.dto.request.MessageCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.request.ReadReceiptRequestDTO;
@@ -13,9 +12,6 @@ import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.ChatRepository;
 import io.github.appleaww.messenger.repository.MessageRepository;
 import io.github.appleaww.messenger.repository.UserRepository;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -34,51 +29,51 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
-    private final KafkaProducerService kafkaProducerService;
-    private final MeterRegistry meterRegistry;
+    private final MetricsService metricsService;
 
     @Transactional
     public MessageCreateResponseDTO createMessage(MessageCreateRequestDTO messageCreateRequestDTO, User user) {
-        Timer.Sample sample = Timer.start(meterRegistry);
+        MetricsService.MessageSendTimerContext timerContext = metricsService.startMessageSendLatency(user.getId().toString(), messageCreateRequestDTO.chatId().toString());
+        try {
+            User sender = userRepository.findById(user.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id " + user.getId()));
 
-        User sender = userRepository.findById(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id " + user.getId()));
+            Chat chat = chatRepository.findById(messageCreateRequestDTO.chatId())
+                    .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + messageCreateRequestDTO.chatId()));
 
-        Chat chat = chatRepository.findById(messageCreateRequestDTO.chatId())
-                .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + messageCreateRequestDTO.chatId()));
+            if (!chat.getParticipants().contains(sender)) {
+                throw new IllegalArgumentException("Chat with id " + messageCreateRequestDTO.chatId() + " does not contain user with id " + sender.getId());
+            }
 
-        if (!chat.getParticipants().contains(sender)) {
-            throw new IllegalArgumentException("Chat with id " + messageCreateRequestDTO.chatId() + " does not contain user with id " + sender.getId());
+            User recipient = chat.getParticipants().stream()
+                    .filter(participant -> !participant.getId().equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
+
+            Message message = new Message();
+            message.setContent(messageCreateRequestDTO.content());
+            message.setSender(sender);
+            message.setSendingTime(Instant.now());
+            message.setChat(chat);
+
+            message = messageRepository.save(message);
+            log.debug("Message saved in chat with id {} by User with id {}",
+                    message.getId(), sender.getId());
+
+            metricsService.messageSent(sender.getId().toString(), chat.getId().toString());
+
+            return new MessageCreateResponseDTO(
+                    message.getId(),
+                    message.getSendingTime(),
+                    message.getContent(),
+                    message.isRead(),
+                    sender.getId(),
+                    recipient.getId(),
+                    chat.getId()
+            );
+        } finally {
+            timerContext.stop();
         }
-
-        User recipient = chat.getParticipants().stream()
-                .filter(participant -> !participant.getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Recipient not found"));
-
-        Message message = new Message();
-        message.setContent(messageCreateRequestDTO.content());
-        message.setSender(sender);
-        message.setSendingTime(Instant.now());
-        message.setChat(chat);
-
-        message = messageRepository.save(message);
-        log.debug("Message saved in chat with id {} by User with id {}", message.getId(), sender.getId());
-
-        meterRegistry.counter("messenger.messages.sent", "userId", sender.getId().toString(), "chatId", chat.getId().toString()).increment();
-
-        sample.stop(meterRegistry.timer("messenger.messages.send.latency", "userId", sender.getId().toString(),
-                "chatId", messageCreateRequestDTO.chatId().toString()));
-
-        return new MessageCreateResponseDTO(
-                message.getId(),
-                message.getSendingTime(),
-                message.getContent(),
-                message.isRead(),
-                sender.getId(),
-                recipient.getId(),
-                chat.getId()
-        );
     }
 
 

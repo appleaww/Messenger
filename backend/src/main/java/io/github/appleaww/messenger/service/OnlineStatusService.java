@@ -1,9 +1,9 @@
 package io.github.appleaww.messenger.service;
 
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.OnlineStatusDTO;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.UserRepository;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,8 @@ public class OnlineStatusService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SimpUserRegistry simpUserRegistry;
     private final UserRepository userRepository;
-    private final MeterRegistry meterRegistry;
     private final Map<String, LocalDateTime> sessionStartTimes = new ConcurrentHashMap<>();
+    private final MetricsService metricsService;
 
     @Transactional
     public void userConnected(Long userId) {
@@ -45,9 +45,8 @@ public class OnlineStatusService {
 
         sessionStartTimes.put(userId.toString(), LocalDateTime.now());
 
-        meterRegistry.counter("messenger.user.activity", "userId", userId.toString(), "action_type", "session_started").increment();
-
-        meterRegistry.counter("messenger.sessions.started", "userId", userId.toString()).increment();
+        metricsService.activitySessionStarted(userId.toString());
+        metricsService.sessionStarted(userId.toString());
     }
 
     @Transactional
@@ -68,15 +67,8 @@ public class OnlineStatusService {
         } else {
             log.debug("User with id {} disconnected one session, {} remaining", userId, sessionCount);
         }
+        metricsService.sessionDuration(sessionStartTimes.remove(userId.toString()), userId.toString());
 
-        LocalDateTime startTime = sessionStartTimes.remove(userId.toString());
-        if (startTime != null) {
-            long durationMs = Duration.between(startTime, LocalDateTime.now()).toMillis();
-
-            meterRegistry.summary("messenger.sessions.duration",
-                            "userId", userId.toString())
-                    .record(durationMs);
-        }
     }
 
     private int getSessionCount(Long userId) {

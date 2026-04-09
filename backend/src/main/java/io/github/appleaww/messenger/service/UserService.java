@@ -1,5 +1,6 @@
 package io.github.appleaww.messenger.service;
 
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.request.SubscribeRequestDTO;
 import io.github.appleaww.messenger.model.entity.User;
 import io.github.appleaww.messenger.repository.UserRepository;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final MeterRegistry meterRegistry;
+    private final MetricsService metricsService;
 
     @Transactional
     public void activateSubscription(User currentUser, SubscribeRequestDTO subscribeRequestDTO) {
@@ -28,7 +29,8 @@ public class UserService {
         user.setIsPremium(true);
         userRepository.save(user);
 
-        meterRegistry.counter("messenger.subscriptions.started", "tier", subscribeRequestDTO.tier(), "userId", user.getId().toString()).increment();
+        metricsService.subscriptionStarted(subscribeRequestDTO.tier(),user.getId().toString());
+
         log.info("User with id {} activated {} subscription", user.getId(), subscribeRequestDTO.tier());
 
 
