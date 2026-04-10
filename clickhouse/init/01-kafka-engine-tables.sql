@@ -7,6 +7,8 @@ SETTINGS
     kafka_format = 'JSONEachRow',
     kafka_num_consumers = 3,
     kafka_max_block_size = 8192;
+    kafka_handle_error_mode = 'stream',--выводим ошибку в специальную колонку в виртуальной таблице, а сообщение считается обработанным
+    kafka_skip_broken_messages = 5,
 
 CREATE TABLE IF NOT EXISTS kafka_technical_metrics (otlp_json String) ENGINE = Kafka
 SETTINGS
@@ -16,5 +18,7 @@ SETTINGS
     kafka_format = 'JSONEachRow',
     kafka_num_consumers = 3,
     kafka_max_block_size = 8192;
+    kafka_handle_error_mode = 'stream',
+    kafka_skip_broken_messages = 5,--сколько можем подряд пропустить невалидных сообщений
 
 SELECT 'Kafka Engine tables created successfully' AS status;
