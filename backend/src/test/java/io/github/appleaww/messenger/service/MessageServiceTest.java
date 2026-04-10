@@ -1,7 +1,5 @@
 package io.github.appleaww.messenger.service;
 
-import io.github.appleaww.messenger.kafka.KafkaProducerService;
-import io.github.appleaww.messenger.kafka.metrics.event.TechnicalEvent;
 import io.github.appleaww.messenger.model.dto.TypingDTO;
 import io.github.appleaww.messenger.model.dto.request.MessageCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.request.ReadReceiptRequestDTO;
@@ -42,7 +40,6 @@ class MessageServiceTest {
     @Mock private MessageRepository messageRepository;
     @Mock private UserRepository userRepository;
     @Mock private ChatRepository chatRepository;
-    @Mock private KafkaProducerService kafkaProducerService;
     private MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
     @InjectMocks private MessageService messageService;
@@ -89,7 +86,6 @@ class MessageServiceTest {
 
         when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
 
-        doNothing().when(kafkaProducerService).sendMessage(anyString(), anyString(), any(TechnicalEvent.class));
 
         MessageCreateResponseDTO result = messageService.createMessage(dto, sender);
 
@@ -112,8 +108,6 @@ class MessageServiceTest {
         verify(userRepository).findById(senderId);
         verify(chatRepository).findById(chatId);
         verify(messageRepository).save(any(Message.class));
-        verify(kafkaProducerService).sendMessage(eq("technical-metrics"), eq(senderId.toString()), any(TechnicalEvent.class));
-        verifyNoMoreInteractions(messageRepository, userRepository, chatRepository, kafkaProducerService);
     }
 
 
