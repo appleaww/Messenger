@@ -4,21 +4,21 @@ SETTINGS
     kafka_broker_list = 'kafka:9092,kafka2:9092,kafka3:9092',
     kafka_topic_list = 'business-metrics',
     kafka_group_name = 'clickhouse-business-consumer-group',
-    kafka_format = 'JSONEachRow',
+    kafka_format = 'JSONAsString',
     kafka_num_consumers = 3,
-    kafka_max_block_size = 8192;
+    kafka_max_block_size = 8192,
     kafka_handle_error_mode = 'stream',--выводим ошибку в специальную колонку в виртуальной таблице, а сообщение считается обработанным
-    kafka_skip_broken_messages = 5,
+    kafka_skip_broken_messages = 5;
 
 CREATE TABLE IF NOT EXISTS kafka_technical_metrics (otlp_json String) ENGINE = Kafka
 SETTINGS
     kafka_broker_list = 'kafka:9092,kafka2:9092,kafka3:9092',
     kafka_topic_list = 'technical-metrics',
     kafka_group_name = 'clickhouse-technical-consumer-group',
-    kafka_format = 'JSONEachRow',
+    kafka_format = 'JSONAsString',
     kafka_num_consumers = 3,
-    kafka_max_block_size = 8192;
+    kafka_max_block_size = 8192,
     kafka_handle_error_mode = 'stream',
-    kafka_skip_broken_messages = 5,--сколько можем подряд пропустить невалидных сообщений
+    kafka_skip_broken_messages = 5;--сколько можем подряд пропустить невалидных сообщений
 
 SELECT 'Kafka Engine tables created successfully' AS status;

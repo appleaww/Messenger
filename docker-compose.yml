@@ -113,8 +113,6 @@ services:
       - OTEL_METRICS_EXPORTER=otlp
       - OTEL_TRACES_EXPORTER=none
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_METRIC_EXPORT_INTERVAL=15000
-      - OTEL_INSTRUMENTATION_MICROMETER_ENABLED=true
     depends_on:
       otel-collector:
         condition: service_started
@@ -150,18 +148,28 @@ services:
       - app-network
 
   analytics_db:
-    image: clickhouse/clickhouse-server:24.1
+    image: clickhouse/clickhouse-server:latest
     container_name: analytics_db
     restart: always
     ports:
       - "8123:8123"
-      - "9000:9000"
     environment:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    depends_on:
+      kafka:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+      messenger:
+        condition: service_started
     volumes:
       - analytics_data:/var/lib/clickhouse
+      - ./clickhouse/init:/docker-entrypoint-initdb.d # инициализация, виртуальных таблиц, target и MV
+      - ./clickhouse/config.d:/etc/clickhouse-server/config.d # фикс конфликта с портами
     networks:
       - app-network
 

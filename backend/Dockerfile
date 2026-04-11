@@ -25,5 +25,7 @@ EXPOSE 8080
 ENTRYPOINT ["java", \
             "-javaagent:/app/opentelemetry-javaagent.jar", \
             "-Dotel.javaagent.debug=false", \
+            "-Dotel.instrumentation.micrometer.enabled=true",\
+            "-Dotel.metric.export.interval=15000", \
             "-jar", \
             "app.jar"]
