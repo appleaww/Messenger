@@ -38,16 +38,15 @@ public class MetricsService {
         meterRegistry.counter("messenger.subscriptions.started", "tier", tier, "userId", userId).increment();
 
     }
-    public void sessionDuration(LocalDateTime startTime, String userId){
+    public void sessionDuration(LocalDateTime startTime){
         if (startTime != null) {
             long durationMs = Duration.between(startTime, LocalDateTime.now()).toMillis();
 
-            meterRegistry.summary("messenger.sessions.duration",
-                    "userId", userId).record(durationMs);
+            meterRegistry.summary("messenger.sessions.duration").record(durationMs);
         }
     }
-    public MessageSendTimerContext startMessageSendLatency(String senderId, String chatId) {
-        Timer timer = meterRegistry.timer("messenger.messages.send.latency", "userId", senderId, "chatId", chatId);
+    public MessageSendTimerContext startMessageSendLatency() {
+        Timer timer = meterRegistry.timer("messenger.messages.send.latency");
 
         Timer.Sample sample = Timer.start(meterRegistry);
         return new MessageSendTimerContext(sample, timer);

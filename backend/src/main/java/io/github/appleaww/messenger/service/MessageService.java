@@ -33,7 +33,7 @@ public class MessageService {
 
     @Transactional
     public MessageCreateResponseDTO createMessage(MessageCreateRequestDTO messageCreateRequestDTO, User user) {
-        MetricsService.MessageSendTimerContext timerContext = metricsService.startMessageSendLatency(user.getId().toString(), messageCreateRequestDTO.chatId().toString());
+        MetricsService.MessageSendTimerContext timerContext = metricsService.startMessageSendLatency();
         try {
             User sender = userRepository.findById(user.getId())
                     .orElseThrow(() -> new EntityNotFoundException("User not found with id " + user.getId()));

@@ -30,6 +30,23 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
     const currentUserId = authService.getUserId();
 
     useEffect(() => {
+        const token = authService.getToken();
+        if (!token || websocketService.isConnected()) return;
+
+        websocketService.connect(token)
+            .then(() => console.log('Сессия начата'))
+            .catch(err => console.error('WebSocket connect error:', err));
+
+    }, []);
+
+    const handleLogout = () => {
+        console.log('Сессия завершена');
+        websocketService.disconnect();
+        authService.logout();
+        onLogout();
+    };
+
+    useEffect(() => {
         loadChats();
 
         statusService.getOnlineUsers()
@@ -126,7 +143,7 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
             <Navbar
                 userName= {authService.getUserName()}
                 userEmail= {authService.getUserEmail()}
-                onLogout={onLogout}
+                onLogout={handleLogout}
                 onSearch={handleSearch}
                 notificationCount={3}
                 messageIndicator={true}

@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -67,7 +65,7 @@ public class OnlineStatusService {
         } else {
             log.debug("User with id {} disconnected one session, {} remaining", userId, sessionCount);
         }
-        metricsService.sessionDuration(sessionStartTimes.remove(userId.toString()), userId.toString());
+        metricsService.sessionDuration(sessionStartTimes.remove(userId.toString()));
 
     }
 

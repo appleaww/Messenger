@@ -133,13 +133,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
     }, [chatId]);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        if (!websocketService.isConnected()) {
-            websocketService.connect(token);
-        }
-
         const unsubMessage = websocketService.onMessage((message: WebSocketMessage) => {
             if (message.chatId === chatId) {
                 setMessages(prev => {
