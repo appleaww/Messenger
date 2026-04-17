@@ -196,23 +196,6 @@ services:
 #    networks:
 #      - app-network
 
-#  analytics_streamlit:
-#    build: ./analytics
-#    container_name: analytics_streamlit_dashboards
-#    command: streamlit run src/dashboard.py --server.port=8501 --server.address=0.0.0.0 --server.enableCORS=false --server.enableXsrfProtection=false
-#    ports:
-#      - "8501:8501"
-#    environment:
-#      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-#      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-#      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
-#      CLICKHOUSE_HOST: analytics_db:8123
-#      KAFKA_BOOTSTRAP_SERVERS: kafka:9092,kafka2:9092,kafka3:9092
-#    depends_on:
-#      - analytics_db
-#    networks:
-#      - app-network
-
   postgres:
     image: postgres:17
     container_name: messenger_db
@@ -228,21 +211,21 @@ services:
     networks:
       - app-network
 
-  flyway:
-    image: flyway/flyway:10
-    container_name: flyway
-    command: migrate
-    volumes:
-      - ./migrations:/flyway/sql
-    environment:
-      FLYWAY_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      FLYWAY_USER: ${POSTGRES_USER}
-      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
-      FLYWAY_BASELINE_ON_MIGRATE: true
-    depends_on:
-      - postgres
-    networks:
-      - app-network
+#  flyway:
+#    image: flyway/flyway:10
+#    container_name: flyway
+#    command: migrate
+#    volumes:
+#      - ./migrations:/flyway/sql
+#    environment:
+#      FLYWAY_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+#      FLYWAY_USER: ${POSTGRES_USER}
+#      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+#      FLYWAY_BASELINE_ON_MIGRATE: true
+#    depends_on:
+#      - postgres
+#    networks:
+#      - app-network
 
 volumes:
   postgres_data:
