@@ -1,6 +1,6 @@
 --основные таблицы в clickhouse
 CREATE TABLE IF NOT EXISTS business_metrics(
-    timestamp      DateTime64(0) DEFAULT now64(0),
+    timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     metric_name    String,
     metric_type    String,
     user_id        Nullable(String),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS business_metrics(
 SELECT 'Table business_metrics created successfully' AS status;
 
 CREATE TABLE IF NOT EXISTS business_session_metrics( --метрика для сессий представлена гистограммой и содержит несколько значений
-    timestamp     DateTime64(0) DEFAULT now64(0),
+    timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     session_count UInt64,
     session_avg   Float64,
     session_max   Float64,
@@ -53,7 +53,7 @@ SELECT 'Table business_message_latency_metrics created successfully' AS status;
 
 
 CREATE TABLE IF NOT EXISTS technical_metrics(
-    timestamp      DateTime64(0) DEFAULT now64(0),
+    timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     metric_name    String,
     metric_type    String,
     value          Float64 DEFAULT 0,

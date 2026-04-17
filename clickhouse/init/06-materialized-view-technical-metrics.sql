@@ -9,10 +9,10 @@ SELECT
 FROM (
     SELECT
     toDateTime(
-        toStartOfInterval(
-            fromUnixTimestamp64Nano(JSONExtractUInt(dp, 'timeUnixNano')),
-            INTERVAL 15 SECOND
-        )
+    toStartOfInterval(
+    fromUnixTimestamp64Nano(JSONExtractUInt(dp, 'timeUnixNano')),
+    INTERVAL 15 SECOND
+    )
     ) AS timestamp,
 
     JSONExtractString(metric, 'name') AS metric_name,
@@ -24,26 +24,22 @@ FROM (
     'other'
     ) AS metric_type,
 
-    if(JSONHas(metric, 'sum'),
-    JSONExtractFloat(dp, 'asDouble'),
-    if(JSONHas(metric, 'gauge'),
-    JSONExtractFloat(dp, 'asDouble'),
-    JSONExtractFloat(dp, 'sum')
-    )
+    multiIf(
+    JSONHas(dp, 'asDouble'), JSONExtractFloat(dp, 'asDouble'),
+    JSONHas(dp, 'asInt'),    toFloat64OrZero(JSONExtractString(dp, 'asInt')),
+    JSONHas(dp, 'sum'),      JSONExtractFloat(dp, 'sum'),
+    0
     ) AS value,
 
     mapFromArrays(
-    JSONExtractArrayRaw(JSONExtractRaw(dp, 'attributes'), 'key'),
-    arrayMap(
-    x -> coalesce(
-    JSONExtractString(x, 'stringValue'),
-    toString(JSONExtractInt(x, 'intValue')),
-    toString(JSONExtractFloat(x, 'doubleValue')),
-    toString(JSONExtractBool(x, 'boolValue')),
+    arrayMap(x -> JSONExtractString(x, 'key'), JSONExtractArrayRaw(dp, 'attributes')),
+    arrayMap(x -> coalesce(
+    JSONExtractString(x, 'value', 'stringValue'),
+    toString(JSONExtractInt(x, 'value', 'intValue')),
+    toString(JSONExtractFloat(x, 'value', 'doubleValue')),
+    toString(JSONExtractBool(x, 'value', 'boolValue')),
     'null'
-    ),
-    JSONExtractArrayRaw(JSONExtractRaw(dp, 'attributes'), 'value')
-    )
+    ), JSONExtractArrayRaw(dp, 'attributes'))
     ) AS attributes
 
     FROM kafka_technical_metrics
