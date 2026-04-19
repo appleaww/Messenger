@@ -65,14 +65,13 @@ SELECT 'Table technical_metrics created successfully' AS status;
 CREATE TABLE IF NOT EXISTS user_activity_metrics ( --таблица для DAU MAU
     timestamp   DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     user_id     String,
-    action_type String DEFAULT 'session_started'
+    action_type String DEFAULT 'null'
     )
     ENGINE = ReplacingMergeTree()
-    ORDER BY (timestamp, user_id)
+    ORDER BY (timestamp, user_id, action_type)
     PARTITION BY toYYYYMM(timestamp)
     TTL toDate(timestamp) + INTERVAL 90 DAY
-    SETTINGS
-    index_granularity = 8192;
+    SETTINGS index_granularity = 8192;
 
-SELECT 'Table user_activity created successfully' AS status;
+SELECT 'Table user_activity_metrics created successfully' AS status;
 

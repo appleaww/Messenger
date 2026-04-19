@@ -60,7 +60,7 @@ public class AuthenticationService {
 
         log.debug("User has logged in with the email {}", user.getEmail());
 
-        metricsService.activityUserLogged();
+        metricsService.userLogged();
 
         return new AuthenticationResponse(token,user.getId(),user.getRole().toString(),user.getName(),user.getEmail());
     }

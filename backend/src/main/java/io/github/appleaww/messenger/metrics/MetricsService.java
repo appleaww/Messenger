@@ -18,14 +18,13 @@ public class MetricsService {
     public void userRegistered(){
         meterRegistry.counter("messenger.users.registered").increment();
     }
-    public void activityUserLogged(){
-        meterRegistry.counter("messenger.user.activity","action_type", "login").increment();
+    public void userLogged(){
+        meterRegistry.counter("messenger.users.login").increment();
     }
     public void chatCreated(){
         meterRegistry.counter("messenger.chats.created").increment();
     }
     public void recordUserActivity(String userId, String actionType){
-        meterRegistry.counter("messenger.user.activity","action_type", actionType).increment();
         kafkaProducerService.sendUserActivity(userId, actionType);
     }
     public void messageSent(){
