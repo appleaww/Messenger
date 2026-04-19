@@ -1,18 +1,22 @@
 package io.github.appleaww.messenger.metrics;
 
+import io.github.appleaww.messenger.kafka.KafkaProducerService;
+import io.github.appleaww.messenger.metrics.event.UserActivityEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.concurrent.ScheduledExecutorService;
 
 @Service
 @RequiredArgsConstructor
 public class MetricsService {
     private final MeterRegistry meterRegistry;
+    private final KafkaProducerService kafkaProducerService;
 
     public void userRegistered(){
         meterRegistry.counter("messenger.users.registered").increment();
@@ -23,8 +27,9 @@ public class MetricsService {
     public void chatCreated(){
         meterRegistry.counter("messenger.chats.created").increment();
     }
-    public void activitySessionStarted(String userId){
-        meterRegistry.counter("messenger.user.activity","userId", userId, "action_type", "session_started").increment();
+    public void recordUserActivity(String userId, String actionType){
+        meterRegistry.counter("messenger.user.activity","action_type", actionType).increment();
+        kafkaProducerService.sendUserActivity(userId, actionType);
     }
     public void messageSent(){
         meterRegistry.counter("messenger.messages.sent").increment();

@@ -74,4 +74,10 @@ public class KafkaProducerConfig {
         return new NewTopic("technical-metrics", 6, (short) 2)
                 .configs(defaultMetricTopicConfigs());
     }
+
+    @Bean
+    public NewTopic userActivityMetricsTopic(){
+        return new NewTopic("user-activity-metrics",3, (short) 2)
+                .configs(defaultMetricTopicConfigs());
+    }
 }
