@@ -23,7 +23,7 @@ public class KafkaProducerService {
         );
         String key = userId;
 
-        kafkaTemplate.send("user-activity-metrics", key, userActivityEvent)
+        kafkaTemplate.send("user-activity-events", key, userActivityEvent)
                 .whenComplete((result, exception) -> {
                     if (exception == null) {
                         log.info("user.activity event(action: {}) sent successfully for user {} to topic {} ",

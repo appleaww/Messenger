@@ -1,15 +1,12 @@
 package io.github.appleaww.messenger.metrics;
 
 import io.github.appleaww.messenger.kafka.KafkaProducerService;
-import io.github.appleaww.messenger.metrics.event.UserActivityEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service

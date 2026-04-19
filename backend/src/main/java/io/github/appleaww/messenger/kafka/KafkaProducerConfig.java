@@ -77,7 +77,7 @@ public class KafkaProducerConfig {
 
     @Bean
     public NewTopic userActivityMetricsTopic(){
-        return new NewTopic("user-activity-metrics",3, (short) 2)
+        return new NewTopic("user-activity-events",3, (short) 2)
                 .configs(defaultMetricTopicConfigs());
     }
 }
