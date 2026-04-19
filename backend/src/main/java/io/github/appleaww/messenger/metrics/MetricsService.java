@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -22,18 +23,14 @@ public class MetricsService {
     public void chatCreated(){
         meterRegistry.counter("messenger.chats.created").increment();
     }
-    public void activityChatOpened(){
-        meterRegistry.counter("messenger.user.activity", "action_type", "chat_opened").increment();
-    }
-    public void activitySessionStarted(){
-        meterRegistry.counter("messenger.user.activity", "action_type", "session_started").increment();
+    public void activitySessionStarted(String userId){
+        meterRegistry.counter("messenger.user.activity","userId", userId, "action_type", "session_started").increment();
     }
     public void messageSent(){
         meterRegistry.counter("messenger.messages.sent").increment();
     }
     public void subscriptionStarted(String tier){
         meterRegistry.counter("messenger.subscriptions.started", "tier", tier).increment();
-
     }
     public void sessionDuration(LocalDateTime startTime){
         if (startTime != null) {

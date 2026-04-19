@@ -63,8 +63,7 @@ class MetricsFetcher:
 
         query = f"""
             SELECT 
-                timestamp, metric_name, metric_type, user_id, action_type,
-                chat_id, tier, role, value
+                timestamp, metric_name, action_type, tier, value
             FROM business_metrics
             WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
             {f"AND metric_name LIKE '%{metric_name_like}%'" if metric_name_like else ""}
@@ -81,8 +80,6 @@ class MetricsFetcher:
         for r in records:
             r["timestamp"] = str(r["timestamp"])
             r["value"] = float(r["value"])
-            r["user_id"] = str(r["user_id"]) if r["user_id"] is not None else None
-            r["chat_id"] = str(r["chat_id"]) if r["chat_id"] is not None else None
 
         return records
 

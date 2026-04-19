@@ -1,10 +1,9 @@
-CREATE MATERIALIZED VIEW IF NOT EXISTS mv_business_metrics
-TO business_metrics AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS mv_user_activity_metrics
+TO user_activity_metrics AS
 SELECT
     timestamp,
-    metric_name,
-    tier,
-    value
+    user_id,
+    action_type
 FROM (
     SELECT
     toDateTime(
@@ -14,18 +13,21 @@ FROM (
     )
     ) AS timestamp,
 
-    JSONExtractString(metric, 'name') AS metric_name,
-
     JSONExtractString(
     JSONExtractRaw(
-    arrayFirst(x -> JSONExtractString(x, 'key') = 'tier',
+    arrayFirst(x -> JSONExtractString(x, 'key') = 'userId',
     JSONExtractArrayRaw(dp, 'attributes')
     ), 'value'
     ), 'stringValue'
-    ) AS tier,
+    ) AS user_id,
 
-
-    JSONExtractFloat(dp, 'asDouble') AS value
+    JSONExtractString(
+    JSONExtractRaw(
+    arrayFirst(x -> JSONExtractString(x, 'key') = 'action_type',
+    JSONExtractArrayRaw(dp, 'attributes')
+    ), 'value'
+    ), 'stringValue'
+    ) AS action_type
 
     FROM kafka_business_metrics
 
@@ -37,12 +39,9 @@ FROM (
     JSONExtractArrayRaw(metric, 'sum', 'dataPoints'),
     JSONExtractArrayRaw(metric, 'gauge', 'dataPoints')
     ) AS dp
-    )
-WHERE metric_name LIKE 'messenger.%'
-  AND NOT endsWith(metric_name, '.max')
-  AND NOT like(metric_name, '%session%');
 
-SELECT 'MV mv_business_metrics created successfully' AS status;
+    WHERE JSONExtractString(metric, 'name') = 'messenger.user.activity'
+    AND action_type = 'session_started'
+    );
 
-
-
+SELECT 'MV mv_user_activity_metrics created successfully' AS status;

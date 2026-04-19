@@ -175,8 +175,6 @@ public class ChatService {
 
         log.debug("Chat with id {} opened by User with id {}", chat.getId(), user.getId());
 
-        metricsService.activityChatOpened();
-
         return new ChatDetailDTO(chat.getId(),
                 companion.getName(),
                 companion.getUsername(),
