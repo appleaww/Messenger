@@ -13,29 +13,26 @@ import java.time.LocalDateTime;
 public class MetricsService {
     private final MeterRegistry meterRegistry;
 
-    public void userRegistered(String userRole){
-        meterRegistry.counter("messenger.users.registered", "role", userRole).increment();
+    public void userRegistered(){
+        meterRegistry.counter("messenger.users.registered").increment();
     }
-    public void activityUserLogged(String userId){
-        meterRegistry.counter("messenger.user.activity", "userId", userId ,"action_type", "login").increment();
+    public void activityUserLogged(){
+        meterRegistry.counter("messenger.user.activity","action_type", "login").increment();
     }
-    public void chatCreated(String initiatorId){
-        meterRegistry.counter("messenger.chats.created","userId", initiatorId).increment();
+    public void chatCreated(){
+        meterRegistry.counter("messenger.chats.created").increment();
     }
-    public void activityChatOpened(String userId){
-        meterRegistry.counter("messenger.user.activity", "userId", userId, "action_type", "chat_opened").increment();
+    public void activityChatOpened(){
+        meterRegistry.counter("messenger.user.activity", "action_type", "chat_opened").increment();
     }
-    public void activitySessionStarted(String userId){
-        meterRegistry.counter("messenger.user.activity", "userId", userId, "action_type", "session_started").increment();
+    public void activitySessionStarted(){
+        meterRegistry.counter("messenger.user.activity", "action_type", "session_started").increment();
     }
-    public void sessionStarted(String userId){
-        meterRegistry.counter("messenger.sessions.started", "userId", userId).increment();
+    public void messageSent(){
+        meterRegistry.counter("messenger.messages.sent").increment();
     }
-    public void messageSent(String senderId, String chatId){
-        meterRegistry.counter("messenger.messages.sent", "userId", senderId, "chatId", chatId).increment();
-    }
-    public void subscriptionStarted(String tier, String userId){
-        meterRegistry.counter("messenger.subscriptions.started", "tier", tier, "userId", userId).increment();
+    public void subscriptionStarted(String tier){
+        meterRegistry.counter("messenger.subscriptions.started", "tier", tier).increment();
 
     }
     public void sessionDuration(LocalDateTime startTime){

@@ -13,8 +13,21 @@ class ClickHouseSettings(BaseSettings):
         env_file=".env",
         extra="ignore",
     )
+
+class FetcherSettings(BaseSettings):
+    technical_metrics_minutes: int = 1
+    technical_metrics_max: int = 30
+    business_metrics_minutes: int = 1
+    business_metrics_limit: int =
+
+    model_config = SettingsConfigDict(
+        env_prefix="FETCHER_",
+        env_file=".env",
+    )
+
 class Settings(BaseSettings):
     clickhouse: ClickHouseSettings = ClickHouseSettings()
+    fetcher: FetcherSettings = FetcherSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

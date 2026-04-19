@@ -60,7 +60,7 @@ public class MessageService {
             log.debug("Message saved in chat with id {} by User with id {}",
                     message.getId(), sender.getId());
 
-            metricsService.messageSent(sender.getId().toString(), chat.getId().toString());
+            metricsService.messageSent();
 
             return new MessageCreateResponseDTO(
                     message.getId(),

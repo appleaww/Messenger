@@ -3,12 +3,8 @@ TO business_metrics AS
 SELECT
     timestamp,
     metric_name,
-    metric_type,
-    user_id,
     action_type,
-    chat_id,
     tier,
-    role,
     value
 FROM (
     SELECT
@@ -21,20 +17,6 @@ FROM (
 
     JSONExtractString(metric, 'name') AS metric_name,
 
-    multiIf(
-    JSONHas(metric, 'sum'),   'counter',
-    JSONHas(metric, 'gauge'), 'gauge',
-    'other'
-    ) AS metric_type,
-
-    JSONExtractString(
-    JSONExtractRaw(
-    arrayFirst(x -> JSONExtractString(x, 'key') = 'userId',
-    JSONExtractArrayRaw(dp, 'attributes')
-    ), 'value'
-    ), 'stringValue'
-    ) AS user_id,
-
     JSONExtractString(
     JSONExtractRaw(
     arrayFirst(x -> JSONExtractString(x, 'key') = 'action_type',
@@ -43,13 +25,6 @@ FROM (
     ), 'stringValue'
     ) AS action_type,
 
-    JSONExtractString(
-    JSONExtractRaw(
-    arrayFirst(x -> JSONExtractString(x, 'key') = 'chatId',
-    JSONExtractArrayRaw(dp, 'attributes')
-    ), 'value'
-    ), 'stringValue'
-    ) AS chat_id,
 
     JSONExtractString(
     JSONExtractRaw(
@@ -59,13 +34,6 @@ FROM (
     ), 'stringValue'
     ) AS tier,
 
-    JSONExtractString(
-    JSONExtractRaw(
-    arrayFirst(x -> JSONExtractString(x, 'key') = 'role',
-    JSONExtractArrayRaw(dp, 'attributes')
-    ), 'value'
-    ), 'stringValue'
-    ) AS role,
 
     JSONExtractFloat(dp, 'asDouble') AS value
 

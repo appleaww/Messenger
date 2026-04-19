@@ -2,16 +2,12 @@
 CREATE TABLE IF NOT EXISTS business_metrics(
     timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     metric_name    String,
-    metric_type    String,
-    user_id        Nullable(String),
     action_type    Nullable(String),
-    chat_id        Nullable(String),
     tier           Nullable(String),
-    role           Nullable(String),
     value          Float64
     )
     ENGINE = ReplacingMergeTree()
-    ORDER BY (timestamp, metric_name, user_id, action_type, chat_id, tier, role)
+    ORDER BY (timestamp, metric_name, action_type, tier)
     PARTITION BY toYYYYMM(timestamp)--разбиваем все данные на партиции внутри clickhouse по времени
     TTL toDate(timestamp) + INTERVAL 60 DAY --срок хранения
     SETTINGS

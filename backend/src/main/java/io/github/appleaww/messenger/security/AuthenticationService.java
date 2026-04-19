@@ -42,7 +42,7 @@ public class AuthenticationService {
 
         userRepository.save(user);
 
-        metricsService.userRegistered(user.getRole().toString());
+        metricsService.userRegistered();
 
         log.debug("User has registered with the email {}", registerRequestDTO.email());
     }
@@ -60,7 +60,7 @@ public class AuthenticationService {
 
         log.debug("User has logged in with the email {}", user.getEmail());
 
-        metricsService.activityUserLogged(user.getId().toString());
+        metricsService.activityUserLogged();
 
         return new AuthenticationResponse(token,user.getId(),user.getRole().toString(),user.getName(),user.getEmail());
     }

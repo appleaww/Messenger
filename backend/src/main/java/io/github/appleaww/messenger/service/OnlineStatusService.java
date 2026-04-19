@@ -43,8 +43,7 @@ public class OnlineStatusService {
 
         sessionStartTimes.put(userId.toString(), LocalDateTime.now());
 
-        metricsService.activitySessionStarted(userId.toString());
-        metricsService.sessionStarted(userId.toString());
+        metricsService.activitySessionStarted();
     }
 
     @Transactional

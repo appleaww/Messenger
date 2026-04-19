@@ -59,7 +59,7 @@ public class ChatService {
 
         log.debug("Chat created with id {}", chat.getId());
 
-        metricsService.chatCreated(initiator.getId().toString());
+        metricsService.chatCreated();
 
         return chatMapper.toDTO(chat, companion);
     }
@@ -175,7 +175,7 @@ public class ChatService {
 
         log.debug("Chat with id {} opened by User with id {}", chat.getId(), user.getId());
 
-        metricsService.activityChatOpened(user.getId().toString());
+        metricsService.activityChatOpened();
 
         return new ChatDetailDTO(chat.getId(),
                 companion.getName(),

@@ -28,7 +28,7 @@ public class UserService {
         user.setIsPremium(true);
         userRepository.save(user);
 
-        metricsService.subscriptionStarted(subscribeRequestDTO.tier(),user.getId().toString());
+        metricsService.subscriptionStarted(subscribeRequestDTO.tier());
 
         log.info("User with id {} activated {} subscription", user.getId(), subscribeRequestDTO.tier());
 
