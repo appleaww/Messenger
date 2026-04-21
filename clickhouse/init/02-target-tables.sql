@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS business_message_latency_metrics( --метрика д
 
 SELECT 'Table business_message_latency_metrics created successfully' AS status;
 
-
 CREATE TABLE IF NOT EXISTS technical_metrics(
     timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     metric_name    String,

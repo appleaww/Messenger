@@ -117,3 +117,24 @@ class MetricsFetcher:
             r["value"] = float(r["value"])
 
         return records
+
+    def get_dau_mau(self) -> dict:
+    query = """
+        SELECT
+            now() AS timestamp,
+        count(DISTINCT if(timestamp >= now() - INTERVAL 1 DAY, user_id, NULL)) AS dau,
+        count(DISTINCT user_id)                                      AS mau
+        FROM user_activity_metrics
+        WHERE timestamp >= now() - INTERVAL 30 DAY
+            """
+
+    df = self.client.query_df(query)
+    if df.empty:
+        return {"error": "user_activity_metrics is empty"}
+
+    row = df.iloc[0]
+    return {
+        "timestamp": str(row["timestamp"]),
+        "dau": int(row["dau"]),
+        "mau": int(row["mau"]),
+    }

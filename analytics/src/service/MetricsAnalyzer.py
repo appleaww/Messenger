@@ -64,11 +64,37 @@ class MetricsAnalyzer:
 
         return kpis
 
+
+    def _calculate_dau_mau_kpis(self, dau_mau_data: dict) -> Dict[str, Any]:
+    kpis = {}
+
+    if isinstance(dau_mau_data, dict) and "error" not in dau_mau_data:
+        kpis.update({
+            "timestamp": dau_mau_data.get("timestamp"),
+            "dau": int(dau_mau_data.get("dau", 0)),
+            "mau": int(dau_mau_data.get("mau", 0)),
+        })
+    else:
+        if isinstance(dau_mau_data, dict) and "error" in dau_mau_data:
+            self.logger.warning(f"DAU/MAU metrics error: {dau_mau_data.get('error')}")
+        kpis.update({
+            "timestamp": None,
+            "dau": 0,
+            "mau": 0
+        })
+        return kpis
+
     def calculate_kpis(self) -> Dict[str, Any]:
         session_data = self.fetcher.get_latest_session_metrics()
         latency_data = self.fetcher.get_latest_latency_metrics()
+        dau_mau_data = self.fetcher.get_dau_mau()
 
         session_kpis = self._calculate_session_kpis(session_data)
         latency_kpis = self._calculate_latency_kpis(latency_data)
+        dau_mau_kpis = self._calculate_dau_mau_kpis(dau_mau_data)
 
-        return {**session_kpis, **latency_kpis}
+        return {
+            **session_kpis,
+            **latency_kpis,
+            **dau_mau_kpis
+        }
