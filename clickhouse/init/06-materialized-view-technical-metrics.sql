@@ -68,10 +68,10 @@ FROM (
     'db.client.connections.wait_time',
     'db.client.connections.use_time',
 
-    'kafka.producer.record.send_total',
-    'kafka.producer.record.error.rate',
-    'kafka.producer.request.in_flight',
-    'kafka.producer.outgoing.byte_rate',
+    'kafka.producer.record_send_total',
+    'kafka.producer.record_error_rate',
+    'kafka.producer.requests_in_flight',
+    'kafka.producer.outgoing_byte_rate',
     'kafka.producer.connection_count')
     );
 
