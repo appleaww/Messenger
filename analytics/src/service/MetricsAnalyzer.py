@@ -112,7 +112,7 @@ class MetricsAnalyzer:
 
         kpis["timestamp"] = str(business_data[0]["timestamp"])
 
-        groups = self._group_metrics_by_name(business_data)
+        groups = self.group_metrics_by_name(business_data)
 
         mapping = {
             "messenger.messages.sent":        "messages_sent",
@@ -129,7 +129,7 @@ class MetricsAnalyzer:
 
         return kpis
 
-    def _group_metrics_by_name(self, metrics_data: list[dict]) -> dict[str, float]:
+    def group_metrics_by_name(self, metrics_data: list[dict]) -> dict[str, float]:
         groups: dict[str, float] = {}
         for row in metrics_data:
             metric_name = row.get("metric_name")
@@ -163,7 +163,7 @@ class MetricsAnalyzer:
 
         kpis["timestamp"] = str(technical_data[0]["timestamp"])
 
-        groups = self._group_metrics_by_name(technical_data)
+        groups = self.group_metrics_by_name(technical_data)
 
         def get(name: str, default: float = 0.0) -> float:
             return groups.get(name, default)
@@ -199,20 +199,20 @@ class MetricsAnalyzer:
     def calculate_kpis(self) -> Dict[str, Any]:
         session_data = self.fetcher.get_latest_session_metrics()
         latency_data = self.fetcher.get_latest_latency_metrics()
-        dau_mau_data = self.fetcher.get_dau_mau()
         business_data = self.fetcher.get_latest_business_metrics()
         technical_data = self.fetcher.get_latest_technical_metrics()
-
         session_kpis = self._calculate_session_kpis(session_data)
         latency_kpis = self._calculate_latency_kpis(latency_data)
-        dau_mau_kpis = self._calculate_dau_mau_kpis(dau_mau_data)
         business_kpis = self._calculate_business_kpis(business_data)
         technical_kpis = self._calculate_technical_kpis(technical_data)
 
         return {
             **session_kpis,
             **latency_kpis,
-            **dau_mau_kpis,
             **business_kpis,
             **technical_kpis,
         }
+
+    def calculate_dau_mau_kpis(self) -> Dict[str, Any]:
+        dau_mau_data = self.fetcher.get_dau_mau()
+        return self._calculate_dau_mau_kpis(dau_mau_data)
