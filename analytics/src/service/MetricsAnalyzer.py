@@ -12,8 +12,13 @@ class MetricsAnalyzer:
         self.is_first_run: bool = True
         self.logger = logging.getLogger(__name__)
 
+
     def _calculate_session_kpis(self, session_data: dict) -> Dict[str, Any]:
-        kpis = {}
+        kpis = {
+            "sessions_per_minute": 0,
+            "avg_session_duration_sec": 0.0,
+            "max_session_duration_sec": 0.0,
+        }
 
         if isinstance(session_data, dict) and "error" not in session_data:
             current_session_count = session_data["session_count"]
@@ -32,12 +37,18 @@ class MetricsAnalyzer:
             })
         else:
             if isinstance(session_data, dict) and "error" in session_data:
-                self.logger.warning(f"Session metrics error: {session_data['error']}")
+                self.logger.warning(f"Session metrics error: {session_data.get('error')}")
 
         return kpis
 
+
     def _calculate_latency_kpis(self, latency_data: dict) -> Dict[str, Any]:
-        kpis = {}
+        kpis = {
+            "messages_per_minute": 0,
+            "avg_message_latency_ms": 0.0,
+            "max_message_latency_ms": 0.0,
+            "min_message_latency_ms": 0.0,
+        }
 
         if isinstance(latency_data, dict) and "error" not in latency_data:
             current_count = latency_data["count"]
@@ -60,41 +71,89 @@ class MetricsAnalyzer:
             })
         else:
             if isinstance(latency_data, dict) and "error" in latency_data:
-                self.logger.warning(f"Latency metrics error: {latency_data['error']}")
+                self.logger.warning(f"Latency metrics error: {latency_data.get('error')}")
 
         return kpis
 
 
     def _calculate_dau_mau_kpis(self, dau_mau_data: dict) -> Dict[str, Any]:
-    kpis = {}
-
-    if isinstance(dau_mau_data, dict) and "error" not in dau_mau_data:
-        kpis.update({
-            "timestamp": dau_mau_data.get("timestamp"),
-            "dau": int(dau_mau_data.get("dau", 0)),
-            "mau": int(dau_mau_data.get("mau", 0)),
-        })
-    else:
-        if isinstance(dau_mau_data, dict) and "error" in dau_mau_data:
-            self.logger.warning(f"DAU/MAU metrics error: {dau_mau_data.get('error')}")
-        kpis.update({
+        kpis = {
             "timestamp": None,
             "dau": 0,
-            "mau": 0
-        })
+            "mau": 0,
+        }
+
+        if isinstance(dau_mau_data, dict) and "error" not in dau_mau_data:
+            kpis.update({
+                "timestamp": dau_mau_data.get("timestamp"),
+                "dau": int(dau_mau_data.get("dau", 0)),
+                "mau": int(dau_mau_data.get("mau", 0)),
+            })
+        else:
+            if isinstance(dau_mau_data, dict) and "error" in dau_mau_data:
+                self.logger.warning(f"DAU/MAU metrics error: {dau_mau_data.get('error')}")
+
         return kpis
+
+
+    def _calculate_business_kpis(self, business_data: list[dict]) -> Dict[str, Any]:
+        kpis = {
+            "timestamp": None,
+            "messages_sent": 0,
+            "chats_created": 0,
+            "users_registered": 0,
+            "users_login": 0,
+            "subscriptions_started": 0,
+        }
+
+        if not business_data:
+            self.logger.warning("Business metrics data is empty")
+            return kpis
+
+        timestamps = [row.get("timestamp") for row in business_data if row.get("timestamp")]
+        if timestamps:
+            kpis["timestamp"] = str(max(timestamps))
+
+        from collections import defaultdict
+        groups = defaultdict(list)
+
+        for row in business_data:
+            metric_name = row.get("metric_name")
+            value = row.get("value")
+            if metric_name and value is not None:
+                groups[metric_name].append(float(value))
+
+        mapping = {
+            "messenger.messages.sent":        "messages_sent",
+            "messenger.chats.created":        "chats_created",
+            "messenger.users.registered":     "users_registered",
+            "messenger.users.login":          "users_login",
+            "messenger.subscriptions.started": "subscriptions_started",
+        }
+
+        for metric_name, target_key in mapping.items():
+            values = groups.get(metric_name, [])
+            if values:
+                kpis[target_key] = int(max(values))
+
+        return kpis
+
 
     def calculate_kpis(self) -> Dict[str, Any]:
         session_data = self.fetcher.get_latest_session_metrics()
         latency_data = self.fetcher.get_latest_latency_metrics()
         dau_mau_data = self.fetcher.get_dau_mau()
 
+        business_data = self.fetcher.get_latest_business_metrics(minutes=5)
+
         session_kpis = self._calculate_session_kpis(session_data)
         latency_kpis = self._calculate_latency_kpis(latency_data)
         dau_mau_kpis = self._calculate_dau_mau_kpis(dau_mau_data)
+        business_kpis = self._calculate_business_kpis(business_data)
 
         return {
             **session_kpis,
             **latency_kpis,
-            **dau_mau_kpis
+            **dau_mau_kpis,
+            **business_kpis
         }

@@ -55,12 +55,12 @@ class MetricsFetcher:
     def get_latest_business_metrics(
             self,
             minutes: Optional[int] = None,
-            limit: int = 1000,
+            max_business_metrics: Optional[int] = None,
             metric_name_like: Optional[str] = None,
     ) -> list[dict]:
 
         minutes = minutes or self.fetcher_settings.business_metrics_minutes
-
+        max_business_metrics = max_business_metrics or self.fetcher_settings.business_metrics_max
         query = f"""
             SELECT 
                 timestamp, metric_name, action_type, tier, value
@@ -68,7 +68,7 @@ class MetricsFetcher:
             WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
             {f"AND metric_name LIKE '%{metric_name_like}%'" if metric_name_like else ""}
             ORDER BY timestamp DESC
-            LIMIT {limit}
+            LIMIT {max_business_metrics}
         """
 
         df = self.client.query_df(query)
@@ -86,12 +86,11 @@ class MetricsFetcher:
     def get_recent_technical_metrics(
             self,
             minutes: Optional[int] = None,
-            max_metrics: Optional[int] = None,
+            max_technical_metrics: Optional[int] = None,
     ) -> list[dict]:
 
         minutes = minutes or self.fetcher_settings.technical_metrics_minutes
-        max_metrics = max_metrics or self.fetcher_settings.technical_metrics_max
-
+        max_technical_metrics = max_technical_metrics or self.fetcher_settings.technical_metrics_max
         query = f"""
             SELECT
                 metric_name,
@@ -103,7 +102,7 @@ class MetricsFetcher:
             WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
             GROUP BY metric_name
             ORDER BY timestamp DESC
-            LIMIT {max_metrics}
+            LIMIT {max_technical_metrics}
         """
 
         df = self.client.query_df(query)
@@ -119,22 +118,22 @@ class MetricsFetcher:
         return records
 
     def get_dau_mau(self) -> dict:
-    query = """
-        SELECT
-            now() AS timestamp,
-        count(DISTINCT if(timestamp >= now() - INTERVAL 1 DAY, user_id, NULL)) AS dau,
-        count(DISTINCT user_id)                                      AS mau
-        FROM user_activity_metrics
-        WHERE timestamp >= now() - INTERVAL 30 DAY
-            """
+        query = """
+            SELECT
+                now() AS timestamp,
+            count(DISTINCT if(timestamp >= now() - INTERVAL 1 DAY, user_id, NULL)) AS dau,
+            count(DISTINCT user_id)                                      AS mau
+            FROM user_activity_metrics
+            WHERE timestamp >= now() - INTERVAL 30 DAY
+                """
 
-    df = self.client.query_df(query)
-    if df.empty:
-        return {"error": "user_activity_metrics is empty"}
+        df = self.client.query_df(query)
+        if df.empty:
+            return {"error": "user_activity_metrics is empty"}
 
-    row = df.iloc[0]
-    return {
-        "timestamp": str(row["timestamp"]),
-        "dau": int(row["dau"]),
-        "mau": int(row["mau"]),
-    }
+        row = df.iloc[0]
+        return {
+            "timestamp": str(row["timestamp"]),
+            "dau": int(row["dau"]),
+            "mau": int(row["mau"]),
+        }

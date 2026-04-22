@@ -53,6 +53,26 @@ FROM (
     JSONExtractArrayRaw(metric, 'gauge', 'dataPoints'),
     JSONExtractArrayRaw(metric, 'histogram', 'dataPoints')
     ) AS dp
+
+    WHERE JSONExtractString(metric, 'name') IN (
+    'jvm.memory.used',
+    'jvm.memory.limit',
+    'jvm.memory.committed',
+    'jvm.gc.duration',
+    'jvm.cpu.recent_utilization',
+    'jvm.thread.count',
+
+    'http.server.request.duration',
+
+    'db.client.connections.usage',
+    'db.client.connections.wait_time',
+    'db.client.connections.use_time',
+
+    'kafka.producer.record.send_total',
+    'kafka.producer.record.error.rate',
+    'kafka.producer.request.in_flight',
+    'kafka.producer.outgoing.byte_rate',
+    'kafka.producer.connection_count')
     );
 
 SELECT 'MV mv_technical_metrics created successfully' AS status;

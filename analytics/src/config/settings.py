@@ -18,7 +18,7 @@ class FetcherSettings(BaseSettings):
     technical_metrics_minutes: int = 1
     technical_metrics_max: int = 30
     business_metrics_minutes: int = 1
-    business_metrics_limit: int =
+    business_metrics_max: int = 5
 
     model_config = SettingsConfigDict(
         env_prefix="FETCHER_",
