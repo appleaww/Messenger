@@ -56,17 +56,16 @@ class MetricsFetcher:
             self,
             minutes: Optional[int] = None,
             max_business_metrics: Optional[int] = None,
-            metric_name_like: Optional[str] = None,
     ) -> list[dict]:
 
         minutes = minutes or self.fetcher_settings.business_metrics_minutes
         max_business_metrics = max_business_metrics or self.fetcher_settings.business_metrics_max
+
         query = f"""
             SELECT 
                 timestamp, metric_name, action_type, tier, value
             FROM business_metrics
             WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
-            {f"AND metric_name LIKE '%{metric_name_like}%'" if metric_name_like else ""}
             ORDER BY timestamp DESC
             LIMIT {max_business_metrics}
         """
@@ -83,7 +82,7 @@ class MetricsFetcher:
 
         return records
 
-    def get_recent_technical_metrics(
+    def get_latest_technical_metrics(
             self,
             minutes: Optional[int] = None,
             max_technical_metrics: Optional[int] = None,
@@ -91,16 +90,16 @@ class MetricsFetcher:
 
         minutes = minutes or self.fetcher_settings.technical_metrics_minutes
         max_technical_metrics = max_technical_metrics or self.fetcher_settings.technical_metrics_max
+
         query = f"""
             SELECT
+                timestamp,
                 metric_name,
-                argMax(timestamp, timestamp)      AS timestamp,
-                argMax(metric_type, timestamp)    AS metric_type,
-                argMax(value, timestamp)          AS value,
-                argMax(attributes, timestamp)     AS attributes
+                metric_type,
+                value,
+                attributes
             FROM technical_metrics
             WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
-            GROUP BY metric_name
             ORDER BY timestamp DESC
             LIMIT {max_technical_metrics}
         """

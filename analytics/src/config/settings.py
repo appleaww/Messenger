@@ -16,7 +16,7 @@ class ClickHouseSettings(BaseSettings):
 
 class FetcherSettings(BaseSettings):
     technical_metrics_minutes: int = 1
-    technical_metrics_max: int = 30
+    technical_metrics_max: int = 15
     business_metrics_minutes: int = 1
     business_metrics_max: int = 5
 
