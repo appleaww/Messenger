@@ -110,18 +110,9 @@ class MetricsAnalyzer:
             self.logger.warning("Business metrics data is empty")
             return kpis
 
-        timestamps = [row.get("timestamp") for row in business_data if row.get("timestamp")]
-        if timestamps:
-            kpis["timestamp"] = str(max(timestamps))
+        kpis["timestamp"] = str(business_data[0]["timestamp"])
 
-        from collections import defaultdict
-        groups = defaultdict(list)
-
-        for row in business_data:
-            metric_name = row.get("metric_name")
-            value = row.get("value")
-            if metric_name and value is not None:
-                groups[metric_name].append(float(value))
+        groups = self._group_metrics_by_name(business_data)
 
         mapping = {
             "messenger.messages.sent":        "messages_sent",
@@ -132,9 +123,75 @@ class MetricsAnalyzer:
         }
 
         for metric_name, target_key in mapping.items():
-            values = groups.get(metric_name, [])
-            if values:
-                kpis[target_key] = int(max(values))
+            value = groups.get(metric_name)
+            if value is not None:
+                kpis[target_key] = int(value)
+
+        return kpis
+
+    def _group_metrics_by_name(self, metrics_data: list[dict]) -> dict[str, float]:
+        groups: dict[str, float] = {}
+        for row in metrics_data:
+            metric_name = row.get("metric_name")
+            value = row.get("value")
+            if metric_name and value is not None and metric_name not in groups:
+                groups[metric_name] = float(value)
+        return groups
+
+    def _calculate_technical_kpis(self, technical_data: list[dict]) -> Dict[str, Any]:
+        kpis: Dict[str, Any] = {
+            "timestamp": None,
+            "memory_used_bytes": 0,
+            "memory_committed_bytes": 0,
+            "memory_limit_bytes": 0,
+            "memory_usage_percent": 0.0,
+            "memory_committed_percent": 0.0,
+            "cpu_utilization_percent": 0.0,
+            "thread_count": 0,
+            "gc_duration_ms": 0.0,
+            "kafka_messages_sent_per_minute": 0,
+            "kafka_connection_count": 0,
+            "db_connections_active": 0,
+            "db_connection_wait_time_ms": 0.0,
+            "db_connection_use_time_ms": 0.0,
+            "http_request_duration_ms": 0.0,
+        }
+
+        if not technical_data:
+            self.logger.warning("Technical metrics data is empty")
+            return kpis
+
+        kpis["timestamp"] = str(technical_data[0]["timestamp"])
+
+        groups = self._group_metrics_by_name(technical_data)
+
+        def get(name: str, default: float = 0.0) -> float:
+            return groups.get(name, default)
+
+        used = get('jvm.memory.used')
+        committed = get('jvm.memory.committed')
+        limit = get('jvm.memory.limit')
+
+        kpis.update({
+            "memory_used_bytes": int(used),
+            "memory_committed_bytes": int(committed),
+            "memory_limit_bytes": int(limit),
+            "memory_usage_percent": round((used / limit * 100), 2) if limit > 0 else 0.0,
+            "memory_committed_percent": round((committed / limit * 100), 2) if limit > 0 else 0.0,
+        })
+
+        kpis.update({
+            "cpu_utilization_percent": round(get('jvm.cpu.recent_utilization') * 100, 2),
+            "thread_count": int(get('jvm.thread.count')),
+            "gc_duration_ms": round(get('jvm.gc.duration') * 1000, 2),
+            "kafka_connection_count": int(get('kafka.producer.connection_count')),
+            "db_connections_active": int(get('db.client.connections.usage')),
+            "db_connection_wait_time_ms": round(get('db.client.connections.wait_time') * 1000, 2),
+            "db_connection_use_time_ms": round(get('db.client.connections.use_time') * 1000, 2),
+            "http_request_duration_ms": round(get('http.server.request.duration') * 1000, 2),
+        })
+
+        kpis["kafka_messages_sent_per_minute"] = int(get('kafka.producer.record_send_total'))
 
         return kpis
 
@@ -143,17 +200,19 @@ class MetricsAnalyzer:
         session_data = self.fetcher.get_latest_session_metrics()
         latency_data = self.fetcher.get_latest_latency_metrics()
         dau_mau_data = self.fetcher.get_dau_mau()
-
-        business_data = self.fetcher.get_latest_business_metrics(minutes=5)
+        business_data = self.fetcher.get_latest_business_metrics()
+        technical_data = self.fetcher.get_latest_technical_metrics()
 
         session_kpis = self._calculate_session_kpis(session_data)
         latency_kpis = self._calculate_latency_kpis(latency_data)
         dau_mau_kpis = self._calculate_dau_mau_kpis(dau_mau_data)
         business_kpis = self._calculate_business_kpis(business_data)
+        technical_kpis = self._calculate_technical_kpis(technical_data)
 
         return {
             **session_kpis,
             **latency_kpis,
             **dau_mau_kpis,
-            **business_kpis
+            **business_kpis,
+            **technical_kpis,
         }
