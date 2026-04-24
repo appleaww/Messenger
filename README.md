@@ -14,5 +14,12 @@
 ```bash
   just ui
 ```
-Схема базы данных PostgreSQL
+****
+### Схема базы данных PostgreSQL
+****
 ![](images/db-schema-demo.gif)
+****
+### Схема базы данных ClickHouse
+****
+![](images/click-house-schema.png)
+
