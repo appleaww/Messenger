@@ -2,13 +2,10 @@
 ****
 ....
 
-В проекте использованы следующие технологии и инструменты: 
+В проекте(backend) использованы следующие технологии и инструменты: 
 
-.
-
-.
-
-.
+Spring Boot, Hibernate, REST, WebSocket, Lombok, Micrometer, MeterRegistry, PostgreSQL, ClickHouse, ClickHouse kafka engine, Apache Kafka,
+OpenTelemetry Java Agent, grafana, JUnit, Mockito, AssertJ
 ****
 ### Архитектура
 ****
@@ -25,6 +22,7 @@
 ### Схема базы данных ClickHouse
 ****
 ![](images/click-house-schema.png)
+****
 ### Запуск проекта
 ****
  Проект использует инструмент - just(https://just.systems) — современный и удобный runner команд.
