@@ -14,5 +14,3 @@
 ```bash
   just ui
 ```
-
- 
