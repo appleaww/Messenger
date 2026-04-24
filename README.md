@@ -14,3 +14,5 @@
 ```bash
   just ui
 ```
+Схема базы данных PostgreSQL
+![](images/db-schema-demo.gif)
