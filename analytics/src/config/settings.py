@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 
 class ClickHouseSettings(BaseSettings):
     host: str = "analytics_db"

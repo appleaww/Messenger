@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any
-from src.analytics.fetcher import MetricsFetcher
+import MetricsFetcher
 
 
 class MetricsAnalyzer:

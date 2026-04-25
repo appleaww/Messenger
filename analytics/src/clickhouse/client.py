@@ -12,7 +12,7 @@ def get_clickhouse_client() -> Client:
         password=settings.clickhouse.password,
         database=settings.clickhouse.database,
         send_receive_timeout=60,
-        compress-True,
+        compress=True,
     )
     print("Connected to ClickHouse server")
     return client

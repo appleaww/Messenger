@@ -1,10 +1,9 @@
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta
 
-from src.analytics.saver import MetricsSaver
+from src.service.MetricsSaver import MetricsSaver
 from src.config.settings import settings
 
 logger = logging.getLogger(__name__)

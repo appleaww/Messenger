@@ -1,9 +1,8 @@
 from clickhouse_connect.driver.client import Client
-import pandas as pd
 from typing import Optional
 
 from src.clickhouse.client import clickhouse_client
-from src.settings import settings
+from src.config.settings import settings
 
 
 class MetricsFetcher:

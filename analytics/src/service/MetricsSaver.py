@@ -1,11 +1,10 @@
 import logging
 import pandas as pd
 from clickhouse_connect.driver.client import Client
-from typing import Optional
 
 from src.clickhouse.client import clickhouse_client
-from src.analytics.fetcher import MetricsFetcher
-from src.analytics.analyzer import MetricsAnalyzer
+from src.service.MetricsFetcher import MetricsFetcher
+from src.service.MetricsAnalyzer import MetricsAnalyzer
 
 
 class MetricsSaver:
