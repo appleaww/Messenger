@@ -35,11 +35,22 @@ class SchedulerSettings(BaseSettings):
         env_file=".env",
         extra="ignore",
     )
+class LoggingSettings(BaseSettings):
+    level: str = "INFO"
+    format: str = "%(levelname)s:     %(asctime)s %(name)s: %(message)s"
+    datefmt: str = "%Y-%m-%d %H:%M:%S"
+
+    model_config = SettingsConfigDict(
+        env_prefix="LOG_",
+        env_file=".env",
+        extra="ignore",
+    )
 
 class Settings(BaseSettings):
     clickhouse: ClickHouseSettings = ClickHouseSettings()
     fetcher: FetcherSettings = FetcherSettings()
     scheduler: SchedulerSettings = SchedulerSettings()
+    logging: LoggingSettings = LoggingSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

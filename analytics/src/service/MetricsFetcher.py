@@ -110,7 +110,7 @@ class MetricsFetcher:
     def get_dau_mau(self) -> dict:
         query = """
             SELECT
-                timestamp,
+            now64(0, 'Europe/Moscow') AS timestamp,
             count(DISTINCT if(timestamp >= now() - INTERVAL 1 DAY, user_id, NULL)) AS dau,
             count(DISTINCT user_id) AS mau
             FROM user_activity_metrics

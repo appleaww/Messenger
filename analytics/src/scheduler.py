@@ -1,4 +1,5 @@
 import logging
+import sys
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime, timedelta
@@ -12,6 +13,16 @@ scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
 @asynccontextmanager
 async def lifespan(app):
+    logging.basicConfig(
+        level=getattr(logging, settings.logging.level.upper(), logging.INFO),
+        format=settings.logging.format,
+        datefmt=settings.logging.datefmt,
+        handlers=[logging.StreamHandler(sys.stdout)],
+        force=True
+    )
+
+    logging.getLogger("src.service").setLevel(logging.INFO)
+
     delay_minutes = settings.scheduler.initial_delay_minutes
 
     saver = MetricsSaver()
