@@ -4,7 +4,7 @@ from src.config.settings import settings
 from functools import lru_cache
 
 @lru_cache(maxsize=1)
-def get clickhouse_client() -> Client:
+def get_clickhouse_client() -> Client:
     client = get_client(
         host=settings.clickhouse.host,
         port=settings.clickhouse.port,
@@ -17,4 +17,4 @@ def get clickhouse_client() -> Client:
     print("Connected to ClickHouse server")
     return client
 
-clickhouse_client= get_clickhouse_client()
+clickhouse_client = get_clickhouse_client()

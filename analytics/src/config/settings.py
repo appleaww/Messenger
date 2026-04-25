@@ -15,9 +15,7 @@ class ClickHouseSettings(BaseSettings):
     )
 
 class FetcherSettings(BaseSettings):
-    technical_metrics_minutes: int = 1
     technical_metrics_max: int = 15
-    business_metrics_minutes: int = 1
     business_metrics_max: int = 5
 
     model_config = SettingsConfigDict(
@@ -25,9 +23,19 @@ class FetcherSettings(BaseSettings):
         env_file=".env",
     )
 
+class SchedulerSettings(BaseSettings):
+    initial_delay_minutes: int = 5
+
+    model_config = SettingsConfigDict(
+        env_prefix="SCHEDULER_",
+        env_file=".env",
+        extra="ignore",
+    )
+
 class Settings(BaseSettings):
     clickhouse: ClickHouseSettings = ClickHouseSettings()
     fetcher: FetcherSettings = FetcherSettings()
+    scheduler: SchedulerSettings = SchedulerSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

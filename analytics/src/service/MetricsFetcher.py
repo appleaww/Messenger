@@ -54,18 +54,14 @@ class MetricsFetcher:
 
     def get_latest_business_metrics(
             self,
-            minutes: Optional[int] = None,
             max_business_metrics: Optional[int] = None,
     ) -> list[dict]:
-
-        minutes = minutes or self.fetcher_settings.business_metrics_minutes
         max_business_metrics = max_business_metrics or self.fetcher_settings.business_metrics_max
 
         query = f"""
             SELECT 
-                timestamp, metric_name, action_type, tier, value
+                timestamp, metric_name, tier, value
             FROM business_metrics
-            WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
             ORDER BY timestamp DESC
             LIMIT {max_business_metrics}
         """
@@ -84,11 +80,8 @@ class MetricsFetcher:
 
     def get_latest_technical_metrics(
             self,
-            minutes: Optional[int] = None,
             max_technical_metrics: Optional[int] = None,
     ) -> list[dict]:
-
-        minutes = minutes or self.fetcher_settings.technical_metrics_minutes
         max_technical_metrics = max_technical_metrics or self.fetcher_settings.technical_metrics_max
 
         query = f"""
@@ -99,7 +92,6 @@ class MetricsFetcher:
                 value,
                 attributes
             FROM technical_metrics
-            WHERE timestamp >= now() - INTERVAL {minutes} MINUTE
             ORDER BY timestamp DESC
             LIMIT {max_technical_metrics}
         """
@@ -121,7 +113,7 @@ class MetricsFetcher:
             SELECT
                 now() AS timestamp,
             count(DISTINCT if(timestamp >= now() - INTERVAL 1 DAY, user_id, NULL)) AS dau,
-            count(DISTINCT user_id)                                      AS mau
+            count(DISTINCT user_id) AS mau
             FROM user_activity_metrics
             WHERE timestamp >= now() - INTERVAL 30 DAY
                 """

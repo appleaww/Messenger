@@ -206,6 +206,8 @@ class MetricsAnalyzer:
         business_kpis = self._calculate_business_kpis(business_data)
         technical_kpis = self._calculate_technical_kpis(technical_data)
 
+        self.is_first_run = False
+
         return {
             **session_kpis,
             **latency_kpis,
