@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 import uvicorn
+from src.scheduler import lifespan
 
 from src.clickhouse.client import clickhouse_client
 from src.config.settings import settings
@@ -8,6 +9,7 @@ from src.config.settings import settings
 app = FastAPI(
     title="Analytics Service",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 

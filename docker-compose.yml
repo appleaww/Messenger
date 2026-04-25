@@ -154,9 +154,9 @@ services:
     ports:
       - "8123:8123"
     environment:
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USERNAME}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE}
     depends_on:
       kafka:
         condition: service_healthy

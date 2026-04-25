@@ -1,16 +1,26 @@
 import logging
 from typing import Dict, Any
-import MetricsFetcher
-
+from src.service.MetricsFetcher import MetricsFetcher
 
 class MetricsAnalyzer:
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, fetcher: MetricsFetcher):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self, fetcher: MetricsFetcher):
+        if self._initialized:
+            return
+
         self.fetcher = fetcher
         self.previous_session_count: int = 0
         self.previous_latency_count: int = 0
         self.is_first_run: bool = True
         self.logger = logging.getLogger(__name__)
+        self._initialized = True
 
 
     def _calculate_session_kpis(self, session_data: dict) -> Dict[str, Any]:
@@ -23,7 +33,7 @@ class MetricsAnalyzer:
         if isinstance(session_data, dict) and "error" not in session_data:
             current_session_count = session_data["session_count"]
 
-            if self.is_first_run:
+            if self.previous_session_count == 0:
                 sessions_per_minute = 0
             else:
                 sessions_per_minute = max(0, current_session_count - self.previous_session_count)
@@ -54,20 +64,20 @@ class MetricsAnalyzer:
             current_count = latency_data["count"]
             current_sum = latency_data["sum"]
 
-            if self.is_first_run:
+            if self.previous_latency_count == 0:
                 messages_per_minute = 0
             else:
                 messages_per_minute = max(0, current_count - self.previous_latency_count)
 
             self.previous_latency_count = current_count
 
-            avg_latency_ms = (current_sum / current_count) if current_count > 0 else 0.0
+            avg_latency_ms = (current_sum / current_count * 1000) if current_count > 0 else 0.0
 
             kpis.update({
                 "messages_per_minute": int(messages_per_minute),
                 "avg_message_latency_ms": round(avg_latency_ms, 1),
-                "max_message_latency_ms": round(float(latency_data["latency_max"]), 1),
-                "min_message_latency_ms": round(float(latency_data["latency_min"]), 1),
+                "max_message_latency_ms": round(float(latency_data["latency_max"]) * 1000, 1),
+                "min_message_latency_ms": round(float(latency_data["latency_min"]) * 1000, 1),
             })
         else:
             if isinstance(latency_data, dict) and "error" in latency_data:

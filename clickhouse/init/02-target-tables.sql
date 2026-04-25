@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS business_session_metrics( --метрика для с�
 SELECT 'Table business_session_metrics created successfully' AS status;
 
 CREATE TABLE IF NOT EXISTS business_message_latency_metrics( --метрика для времени создания сообщения представлена гистограммой и содержит несколько значений
-    timestamp     DateTime64(0) DEFAULT now64(0),
+    timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
     count UInt64,
     sum   Float64,
     latency_max   Float64,

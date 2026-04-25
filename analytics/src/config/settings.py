@@ -1,4 +1,9 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
+from dotenv import load_dotenv
+
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path, override=True)
 
 class ClickHouseSettings(BaseSettings):
     host: str = "analytics_db"

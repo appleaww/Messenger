@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS grafana_dau_mau_metrics(
     mau         UInt32 DEFAULT 0
     )
     ENGINE = MergeTree()
-    ORDER BY (timestamp, date)
+    ORDER BY (timestamp)
     PARTITION BY toYYYYMM(timestamp)
     TTL toDate(timestamp) + INTERVAL 1 YEAR
     SETTINGS index_granularity = 8192;
