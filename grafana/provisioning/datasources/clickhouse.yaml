@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: ClickHouse
+    type: grafana-clickhouse-datasource
+    uid: clickhouse
+    access: proxy
+    url: http://analytics_db:8123
+    isDefault: true
+    editable: true
+    jsonData:
+      host: analytics_db
+      port: 8123
+      protocol: http
+      username: appleaww
+      defaultDatabase: default
+      tlsSkipVerify: true
+      httpMethod: POST
+      queryTimeout: 30
+      dialTimeout: 10
+      validateSql: true
+    secureJsonData:
+      password: superpasswordforclickhouse

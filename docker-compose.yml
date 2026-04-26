@@ -102,17 +102,17 @@ services:
     ports:
       - "${MESSENGER_PORT:-8080}:8080"
     environment: # конфиг JavaAgent
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092,kafka2:9092,kafka3:9092
-      - OTEL_SERVICE_NAME=messenger
-      - OTEL_METRIC_NAME_PREFIX=messenger.
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-      - OTEL_METRICS_EXPORTER=otlp
-      - OTEL_TRACES_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092,kafka2:9092,kafka3:9092
+      OTEL_SERVICE_NAME: messenger
+      OTEL_METRIC_NAME_PREFIX: messenger.
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_TRACES_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
     depends_on:
       otel-collector:
         condition: service_started
@@ -126,7 +126,6 @@ services:
         condition: service_started
     networks:
       - app-network
-
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.148.0
@@ -172,6 +171,26 @@ services:
       - ./clickhouse/config.d:/etc/clickhouse-server/config.d # фикс конфликта с портами
     networks:
       - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource, tempo, loki
+    volumes:
+      - grafana_storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+        analytics_db:
+          condition: service_started
+    networks:
+       - app-network
 
 #  analytics:
 #    build: ./analytics
@@ -226,13 +245,14 @@ services:
 #      - postgres
 #    networks:
 #      - app-network
-
+#messenger_
 volumes:
   postgres_data:
   kafka_data:
   kafka2_data:
   kafka3_data:
   analytics_data:
+  grafana_storage:
 
 networks:
   app-network:
