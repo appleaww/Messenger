@@ -46,4 +46,8 @@ OpenTelemetry Java Agent, grafana, JUnit, Mockito, AssertJ
 ```bash
   just ui
 ```
+****
+### Посмотреть дашборды в Grafana можно через меню:
+****
+![](images/ui_grafana_connection.png)
 
