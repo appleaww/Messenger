@@ -1,0 +1,49 @@
+spring.application.name=Messenger
+logging.level.io.github.appleaww.messenger=debug
+server.port=8080
+
+app.admin-emails=${ADMIN_EMAILS:}
+
+spring.datasource.url=jdbc:postgresql://postgres:5432/messenger_db
+spring.datasource.username=appleaww
+spring.datasource.password=superpasswordfordb
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.flyway.enabled=false
+spring.flyway.locations=classpath:db/migration
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=false
+
+jwt.access = SecretKey12345zxcSaintSpringDhdve4f4FFJ4334fvd9940:JDH#hweoc88273&*(@%%ENNDHH@*&^%@
+jwt.expiration = 86400000
+
+
+#KAFKA PROPERTIES
+spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:19092,127.0.0.1:29092,127.0.0.1:39092}
+logging.level.org.apache.kafka.clients.NetworkClient=DEBUG
+
+spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+spring.kafka.producer.client-id=${spring.application.name}-producer
+spring.kafka.producer.acks=all
+spring.kafka.producer.properties.min.insync.replicas=1
+spring.kafka.producer.retries=3
+spring.kafka.admin.fail-fast=true
+
+spring.kafka.producer.batch-size=16384
+spring.kafka.producer.linger-ms=5
+spring.kafka.producer.buffer-memory=33554432
+spring.kafka.producer.compression-type=snappy
+
+#blocking methods in case of server problems
+spring.kafka.producer.properties.max.block.ms=60000
+
+spring.kafka.producer.properties.request.timeout.ms=30000
+spring.kafka.producer.properties.delivery.timeout.ms=120000
+
+
+

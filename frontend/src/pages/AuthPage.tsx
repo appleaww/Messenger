@@ -23,9 +23,11 @@ function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
         try {
             const response = await authService.login({ email, password });
+
             authService.saveToken(response.token);
             authService.saveUserId(response.userId);
-            authService.saveUserData(response.name, response.email);
+            authService.saveUserData(response.name, response.email, response.role);
+
             onLoginSuccess?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ошибка входа');

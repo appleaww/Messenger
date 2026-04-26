@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState, useRef, useId } from 'react';
+import { authService } from '@/services/authService';
 import {
     HashIcon,
     HouseIcon,
@@ -295,6 +296,20 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
             onSearch?.(value);
         };
 
+        const handleUserMenuClick = (item: string) => {
+            if (item === 'devtools') {
+                const role = authService.getUserRole();
+
+                if (role === 'ADMIN') {
+                    window.location.href = 'http://localhost:3000/dashboards';
+                } else {
+                    alert('Доступ запрещён! Только для администраторов.');
+                }
+                return;
+            }
+            onUserItemClick?.(item);
+        };
+
         return (
             <header
                 ref={combinedRef}
@@ -413,7 +428,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                             userName={userName}
                             userEmail={userEmail}
                             onLogout={onLogout}
-                            onItemClick={onUserItemClick}
+                            onItemClick={handleUserMenuClick}
                         />
                     </div>
                 </div>

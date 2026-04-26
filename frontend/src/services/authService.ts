@@ -39,16 +39,27 @@ export const authService = {
         return response.text();
     },
 
-    saveUserData(name: string, email: string): void {
+    saveUserData(name: string, email: string, role?: string): void {
         localStorage.setItem('userName', name);
         localStorage.setItem('userEmail', email);
+        if (role) {
+            this.saveUserRole(role);
+        }
     },
 
-    getUserName(): string{
+    saveUserRole(role: string): void {
+        localStorage.setItem('userRole', role.toUpperCase());
+    },
+
+    getUserRole(): string {
+        return localStorage.getItem('userRole') || 'USER';
+    },
+
+    getUserName(): string {
         return localStorage.getItem('userName') || '';
     },
 
-    getUserEmail(): string{
+    getUserEmail(): string {
         return localStorage.getItem('userEmail') || '';
     },
 
@@ -74,6 +85,7 @@ export const authService = {
         localStorage.removeItem('userId');
         localStorage.removeItem('userName');
         localStorage.removeItem('userEmail');
+        localStorage.removeItem('userRole');
     },
 
     isAuthenticated(): boolean {

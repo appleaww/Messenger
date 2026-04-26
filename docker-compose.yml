@@ -113,6 +113,7 @@ services:
       OTEL_METRICS_EXPORTER: otlp
       OTEL_TRACES_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
     depends_on:
       otel-collector:
         condition: service_started

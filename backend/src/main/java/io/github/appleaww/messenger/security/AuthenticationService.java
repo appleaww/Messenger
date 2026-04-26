@@ -9,9 +9,13 @@ import io.github.appleaww.messenger.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.cfg.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 @Service
 @Slf4j
@@ -21,6 +25,9 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final MetricsService metricsService;
+
+    @Value("${app.admin-emails:}")
+    private String adminEmails;
 
     @Transactional
     public void register(RegisterRequestDTO registerRequestDTO){
@@ -34,8 +41,10 @@ public class AuthenticationService {
         User user = new User();
         user.setEmail(registerRequestDTO.email());
         user.setUsername(registerRequestDTO.username());
-        user.setRole(registerRequestDTO.role());
         user.setName(registerRequestDTO.name());
+
+        boolean isAdmin = isAdminEmail(registerRequestDTO.email());
+        user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
 
         String hashedPassword = passwordEncoder.encode(registerRequestDTO.password());
         user.setPassword(hashedPassword);
@@ -63,5 +72,14 @@ public class AuthenticationService {
         metricsService.userLogged();
 
         return new AuthenticationResponse(token,user.getId(),user.getRole().toString(),user.getName(),user.getEmail());
+    }
+
+    private boolean isAdminEmail(String email){
+        if(email == null || adminEmails.isBlank()){
+            return false;
+        }
+        return Arrays.stream(adminEmails.split(","))
+                .map(String::trim).anyMatch(adminEmail -> adminEmail.equalsIgnoreCase(email));
+
     }
 }
