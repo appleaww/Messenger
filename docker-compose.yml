@@ -190,31 +190,36 @@ services:
     depends_on:
         analytics_db:
           condition: service_started
+        analytics:
+          condition: service_started
     networks:
        - app-network
 
-#  analytics:
-#    build: ./analytics
-#    container_name: analytics
-#    restart: always
-#    environment:
-#      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-#      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-#      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
-#      CLICKHOUSE_HOST: ${CLICKHOUSE_DB}:${CLICKHOUSE_PORT}
-#      KAFKA_BOOTSTRAP_SERVERS: kafka:9092,kafka2:9092,kafka3:9092
-#    ports:
-#      - "8000:8000"
-#      - "8001:8001"
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#      kafka2:
-#        condition: service_healthy
-#      kafka3:
-#        condition: service_healthy
-#    networks:
-#      - app-network
+  analytics:
+    build: ./analytics
+    container_name: analytics
+    restart: always
+    environment:
+      CLICKHOUSE_HOST: analytics_db
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USERNAME: ${CLICKHOUSE_USERNAME}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE}
+    ports:
+      - "8000:8000"
+    depends_on:
+      messenger:
+        condition: service_started
+      analytics_db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+    networks:
+      - app-network
 
   postgres:
     image: postgres:17
