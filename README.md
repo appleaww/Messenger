@@ -23,6 +23,14 @@ OpenTelemetry Java Agent, grafana, JUnit, Mockito, AssertJ
 ****
 ![](images/click-house-schema.png)
 ****
+### Дашборды в Grafana
+****
+![](images/grafana_business_metrics_image.png)
+****
+![](images/grafana_technical_metrics_image.png)
+****
+![](images/grafana_dau_mau_metrics_image.png)
+****
 ### Запуск проекта
 ****
  Проект использует инструмент - just(https://just.systems) — современный и удобный runner команд.
