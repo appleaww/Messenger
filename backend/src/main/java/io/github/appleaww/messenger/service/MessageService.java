@@ -58,7 +58,7 @@ public class MessageService {
 
             message = messageRepository.save(message);
             log.debug("Message saved in chat with id {} by User with id {}",
-                    message.getId(), sender.getId());
+                    chat.getId(), sender.getId());
 
             metricsService.messageSent();
 

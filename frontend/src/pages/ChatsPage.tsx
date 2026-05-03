@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Navbar } from '../components/ui/Navbar';
 import { ChatListItem } from '../components/chat/ChatListItem';
 import {chatService, statusService} from '../services/chatService';
@@ -7,6 +6,7 @@ import './ChatsPage.css';
 import {authService} from "@/services/authService.ts";
 import {websocketService, WebSocketMessage} from "@/services/websocketService.ts";
 import { subscriptionService } from '../services/chatService';
+import { useState, useEffect, useRef } from 'react';
 
 
 interface ChatsPageProps {
@@ -28,6 +28,7 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
     const [subscribing, setSubscribing] = useState(false);
 
     const currentUserId = authService.getUserId();
+    const hasLoadedRef = useRef(false);
 
     useEffect(() => {
         const token = authService.getToken();
@@ -47,7 +48,13 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
     };
 
     useEffect(() => {
-        loadChats();
+        const token = authService.getToken();
+        if (!token) return;
+
+        if (!hasLoadedRef.current) {
+            hasLoadedRef.current = true;
+            loadChats();
+        }
 
         statusService.getOnlineUsers()
             .then(users => setOnlineUsers(new Set(users)))
@@ -56,7 +63,13 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
         const unsubOnline = websocketService.onOnlineStatus(({ userId, isOnline }) => {
             setOnlineUsers(prev => {
                 const next = new Set(prev);
-                isOnline ? next.add(userId) : next.delete(userId);
+
+                if (isOnline) {
+                    next.add(userId);
+                } else {
+                    next.delete(userId);
+                }
+
                 return next;
             });
         });
@@ -272,8 +285,9 @@ function ChatsPage({ onLogout, onOpenChat }: ChatsPageProps) {
                                         await subscriptionService.activateSubscription('PREMIUM');
                                         setSubscriptionTier('PREMIUM');
                                         alert('Подписка Premium успешно активирована!');
-                                    } catch (err: any) {
-                                        alert(err.message || 'Ошибка активации');
+                                    } catch (err: unknown) {
+                                        const errorMessage = err instanceof Error ? err.message : 'Ошибка активации';
+                                        alert(errorMessage);
                                     } finally {
                                         setSubscribing(false);
                                     }

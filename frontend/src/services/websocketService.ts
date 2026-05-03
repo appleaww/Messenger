@@ -36,12 +36,20 @@ export interface OnlineStatus {
 
 class WebSocketService {
     private client: Client | null = null;
+    private isConnecting = false;
+
     private messageHandlers: ((message: WebSocketMessage) => void)[] = [];
     private typingHandlers: ((event: TypingEvent) => void)[] = [];
     private readReceiptHandlers: ((receipt: ReadReceipt) => void)[] = [];
     private onlineStatusHandlers: ((status: OnlineStatus) => void)[] = [];
 
     connect(token: string): Promise<void> {
+        if (this.client?.connected || this.isConnecting) {
+            return Promise.resolve();
+        }
+
+        this.isConnecting = true;
+
         return new Promise((resolve, reject) => {
             this.client = new Client({
                 webSocketFactory: () => new SockJS(WS_URL),
@@ -49,16 +57,25 @@ class WebSocketService {
                     Authorization: `Bearer ${token}`
                 },
                 onConnect: () => {
-                    console.log('WebSocket connected');
+                    console.log('WebSocket connected successfully');
+                    this.isConnecting = false;
                     this.subscribeToMessages();
                     resolve();
                 },
                 onStompError: (frame) => {
                     console.error('STOMP error:', frame);
+                    this.isConnecting = false;
                     reject(new Error('STOMP connection error'));
                 },
+                onWebSocketError: (event) => {
+                    console.error('WebSocket error:', event);
+                    this.isConnecting = false;
+                },
                 reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
             });
+
             this.client.activate();
         });
     }
@@ -86,38 +103,12 @@ class WebSocketService {
             this.onlineStatusHandlers.forEach(handler => handler(status));
         });
     }
-    onOnlineStatus(handler: (status: { userId: number; isOnline: boolean }) => void) {
+
+    onOnlineStatus(handler: (status: OnlineStatus) => void) {
         this.onlineStatusHandlers.push(handler);
         return () => {
             this.onlineStatusHandlers = this.onlineStatusHandlers.filter(h => h !== handler);
         };
-    }
-
-    sendMessage(content: string, chatId: number) {
-        if (!this.client?.connected) return;
-
-        this.client.publish({
-            destination: '/app/chat.sendMessage',
-            body: JSON.stringify({ content, chatId })
-        });
-    }
-
-    sendTyping(chatId: number, isTyping: boolean) {
-        if (!this.client?.connected) return;
-
-        this.client.publish({
-            destination: '/app/chat.typing',
-            body: JSON.stringify({ chatId, isTyping })
-        });
-    }
-
-    sendReadReceipt(chatId: number, messageIds: number[]) {
-        if (!this.client?.connected) return;
-
-        this.client.publish({
-            destination: '/app/chat.readMessages',
-            body: JSON.stringify({ chatId, messageIds })
-        });
     }
 
     onMessage(handler: (message: WebSocketMessage) => void) {
@@ -141,11 +132,36 @@ class WebSocketService {
         };
     }
 
+    sendMessage(content: string, chatId: number) {
+        if (!this.client?.connected) return;
+        this.client.publish({
+            destination: '/app/chat.sendMessage',
+            body: JSON.stringify({ content, chatId })
+        });
+    }
+
+    sendTyping(chatId: number, isTyping: boolean) {
+        if (!this.client?.connected) return;
+        this.client.publish({
+            destination: '/app/chat.typing',
+            body: JSON.stringify({ chatId, isTyping })
+        });
+    }
+
+    sendReadReceipt(chatId: number, messageIds: number[]) {
+        if (!this.client?.connected) return;
+        this.client.publish({
+            destination: '/app/chat.readMessages',
+            body: JSON.stringify({ chatId, messageIds })
+        });
+    }
+
     disconnect() {
         if (this.client) {
             this.client.deactivate();
             this.client = null;
         }
+        this.isConnecting = false;
     }
 
     isConnected(): boolean {

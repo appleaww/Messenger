@@ -32,7 +32,6 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
     const [messages, setMessages] = useState<DisplayMessage[]>([]);
     const [allChats, setAllChats] = useState<ChatListItem[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
     const [companionTyping, setCompanionTyping] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isOnline, setIsOnline] = useState(false);
@@ -41,6 +40,8 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const currentUserId = authService.getUserId();
+    const hasLoadedRef = useRef(false);
+    const isTypingRef = useRef(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -118,9 +119,11 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
     }, [companionId]);
 
     useEffect(() => {
-        loadChatData();
+        if (!hasLoadedRef.current) {
+            hasLoadedRef.current = true;
+            loadChatData();
+        }
     }, [loadChatData]);
-
 
     useEffect(() => {
         setAllChats(prevChats =>
@@ -198,17 +201,27 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
         if (!newMessage.trim()) return;
 
         websocketService.sendMessage(newMessage.trim(), chatId);
+
         setNewMessage('');
-        setIsTyping(false);
-        websocketService.sendTyping(chatId, false);
+        if (isTypingRef.current) {
+            isTypingRef.current = false;
+            websocketService.sendTyping(chatId, false);
+        }
+
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewMessage(e.target.value);
+        const value = e.target.value;
+        setNewMessage(value);
 
-        if (!isTyping) {
-            setIsTyping(true);
-            websocketService.sendTyping(chatId, true);
+        const shouldBeTyping = value.length > 0;
+
+        if (shouldBeTyping !== isTypingRef.current) {
+            isTypingRef.current = shouldBeTyping;
+            websocketService.sendTyping(chatId, shouldBeTyping);
         }
 
         if (typingTimeoutRef.current) {
@@ -216,8 +229,10 @@ export const ChatPage: React.FC<ChatPageProps> = ({ chatId, onBack, onChatSelect
         }
 
         typingTimeoutRef.current = setTimeout(() => {
-            setIsTyping(false);
-            websocketService.sendTyping(chatId, false);
+            if (isTypingRef.current) {
+                isTypingRef.current = false;
+                websocketService.sendTyping(chatId, false);
+            }
         }, 2000);
     };
 
