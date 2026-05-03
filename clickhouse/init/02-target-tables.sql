@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS business_metrics(
     tier           Nullable(String),
     value          Float64
     )
-    ENGINE = ReplacingMergeTree()
+    ENGINE = MergeTree()
     ORDER BY (timestamp, metric_name, tier)
     PARTITION BY toYYYYMM(timestamp)--разбиваем все данные на партиции внутри clickhouse по времени
     TTL toDate(timestamp) + INTERVAL 60 DAY --срок хранения
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS technical_metrics(
     value          Float64 DEFAULT 0,
     attributes     Map(String, String) --другие атрибуты попадают сюда
     )
-    ENGINE = ReplacingMergeTree()
+    ENGINE = MergeTree()
     ORDER BY (timestamp, metric_name)
     PARTITION BY toYYYYMM(timestamp)
     TTL toDate(timestamp) + INTERVAL 30 DAY
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS user_activity_metrics ( --таблица для DAU M
     user_id     String,
     action_type String DEFAULT 'null'
     )
-    ENGINE = ReplacingMergeTree()
+    ENGINE = MergeTree()
     ORDER BY (timestamp, user_id, action_type)
     PARTITION BY toYYYYMM(timestamp)
     TTL toDate(timestamp) + INTERVAL 90 DAY
