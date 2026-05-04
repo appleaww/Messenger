@@ -109,13 +109,13 @@ class MetricsFetcher:
 
     def get_dau_mau(self) -> dict:
         query = """
-                SELECT timestamp, 
-                uniqExactIf(user_id, timestamp >= toStartOfDay(now64(0, 'Europe/Moscow'), 'Europe/Moscow')) AS dau,
+                SELECT now64(0, 'Europe/Moscow') AS timestamp,
+                uniqExactIf(user_id, table.timestamp >= toStartOfDay(now64(0, 'Europe/Moscow'), 'Europe/Moscow')) AS dau,
                     
                 uniqExactIf(user_id, timestamp >= now64(0, 'Europe/Moscow') - INTERVAL 30 DAY) AS mau
 
-                FROM user_activity_metrics
-                WHERE timestamp >= now64(0, 'Europe/Moscow') - INTERVAL 31 DAY 
+                FROM user_activity_metrics AS table
+                WHERE timestamp >= now64(0, 'Europe/Moscow') - INTERVAL 31 DAY \
                 """
 
         df = self.client.query_df(query)

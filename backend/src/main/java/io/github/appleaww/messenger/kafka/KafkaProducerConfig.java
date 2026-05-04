@@ -1,21 +1,21 @@
 package io.github.appleaww.messenger.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import org.springframework.kafka.support.serializer.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationFeature;
+
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.TopicConfig;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.module.afterburner.AfterburnerModule;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,16 +31,15 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(){
+    public ProducerFactory<String, Object> producerFactory() {
         Map<String, Object> props = kafkaProperties.buildProducerProperties();
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(new AfterburnerModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        JsonMapper jsonMapper = JsonMapper.builder()
+                .addModule(new AfterburnerModule())
+                .build();
 
-        JsonSerializer<Object> jsonSerializer = new JsonSerializer<>(objectMapper);
+        JacksonJsonSerializer<Object> jsonSerializer = new JacksonJsonSerializer<>(jsonMapper);
 
         DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(props);
         factory.setValueSerializer(jsonSerializer);
@@ -51,7 +50,7 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaAdmin kafkaAdmin(){
         Map<String, Object> configs = new HashMap<>();
-        configs.putAll(kafkaProperties.buildAdminProperties(null));
+        configs.putAll(kafkaProperties.buildAdminProperties());
         return new KafkaAdmin(configs);
     }
 
