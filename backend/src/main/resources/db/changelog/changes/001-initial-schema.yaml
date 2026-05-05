@@ -1,0 +1,250 @@
+databaseChangeLog:
+- changeSet:
+    id: 1778003285370-1
+    author: artemmoroz (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: chats_pkey
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            defaultValue: Send the first message!
+            name: last_message
+            type: TEXT
+        tableName: chats
+- changeSet:
+    id: 1778003285370-2
+    author: artemmoroz (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: users_pkey
+            name: id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: email
+            type: VARCHAR(100)
+        - column:
+            constraints:
+              nullable: false
+            name: is_online
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: is_premium
+            type: BOOLEAN
+        - column:
+            name: last_seen
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: name
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: password
+            type: VARCHAR(100)
+        - column:
+            constraints:
+              nullable: false
+            name: role
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: username
+            type: VARCHAR(50)
+        tableName: users
+- changeSet:
+    id: 1778003285370-3
+    author: artemmoroz (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: email
+        constraintName: uk6dotkott2kjsp8vw4d0m25fb7
+        tableName: users
+- changeSet:
+    id: 1778003285370-4
+    author: artemmoroz (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: username
+        constraintName: ukr43af9ap4edm43mmtq01oddj6
+        tableName: users
+- changeSet:
+    id: 1778003285370-5
+    author: artemmoroz (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: chat_names_pkey
+            name: chat_id
+            type: BIGINT
+        - column:
+            name: chat_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: chat_names_pkey
+            name: user_id
+            type: BIGINT
+        tableName: chat_names
+- changeSet:
+    id: 1778003285370-6
+    author: artemmoroz (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: messages_pkey
+            name: id
+            type: BIGINT
+        - column:
+            name: message_content
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: is_read
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
+            name: sending_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: chat_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: BIGINT
+        tableName: messages
+- changeSet:
+    id: 1778003285370-7
+    author: artemmoroz (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_chats_pkey
+            name: chat_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: user_chats_pkey
+            name: user_id
+            type: BIGINT
+        tableName: user_chats
+- changeSet:
+    id: 1778003285370-8
+    author: artemmoroz (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: chat_id
+        baseTableName: messages
+        constraintName: fk64w44ngcpqp99ptcb9werdfmb
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: chats
+        validate: true
+- changeSet:
+    id: 1778003285370-9
+    author: artemmoroz (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: chat_id
+        baseTableName: user_chats
+        constraintName: fk7wnur32eifid4w1671b9gnrny
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: chats
+        validate: true
+- changeSet:
+    id: 1778003285370-10
+    author: artemmoroz (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: chat_id
+        baseTableName: chat_names
+        constraintName: fk93e0mna3ngtl8o6446vb7vnfp
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: chats
+        validate: true
+- changeSet:
+    id: 1778003285370-11
+    author: artemmoroz (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: messages
+        constraintName: fkpsmh6clh3csorw43eaodlqvkn
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: users
+        validate: true
+- changeSet:
+    id: 1778003285370-12
+    author: artemmoroz (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: user_chats
+        constraintName: fktdc8rg12fl9yhkd7cqjc2j0oj
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: users
+        validate: true
+

@@ -4,13 +4,14 @@ server.port=8080
 
 app.admin-emails=${ADMIN_EMAILS:}
 
+#migrations
+spring.liquibase.enabled=true
+spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yaml
+
 spring.datasource.url=jdbc:postgresql://postgres:5432/messenger_db
 spring.datasource.username=appleaww
 spring.datasource.password=superpasswordfordb
 spring.datasource.driver-class-name=org.postgresql.Driver
-
-spring.flyway.enabled=false
-spring.flyway.locations=classpath:db/migration
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false

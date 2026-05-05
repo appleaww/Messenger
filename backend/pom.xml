@@ -28,6 +28,8 @@
     </scm>
     <properties>
         <java.version>25</java.version>
+        <postgres.user>${env.POSTGRES_USER}</postgres.user>
+        <postgres.password>${env.POSTGRES_PASSWORD}</postgres.password>
     </properties>
     <dependencies>
         <dependency>
@@ -59,6 +61,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
         </dependency>
 
         <dependency>
@@ -185,6 +192,21 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>4.33.0</version>
+                <configuration>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost:5432/messenger_db</url>
+                    <username>${postgres.user}</username>
+                    <password>${postgres.password}</password>
+                    <changeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</changeLogFile>
+                    <outputChangeLogFile>src/main/resources/db/changelog/changes/001-initial-schema.yaml</outputChangeLogFile>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>
