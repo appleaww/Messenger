@@ -5,6 +5,15 @@ receivers:
         endpoint: 0.0.0.0:4317 #JavaAgent отправляет все метрики на порт через grpc
 
 processors:
+  filter/keep_only_important_metrics:
+    error_mode: ignore
+    metrics:
+      datapoint:
+        - 'metric.name == "http.server.request.duration" and (attributes["http.request.method"] != "GET" or attributes["http.route"] != "/api/chats")'
+        - 'metric.name == "jvm.thread.count" and attributes["jvm.thread.state"] != "runnable"'
+        - '(metric.name == "jvm.memory.used" or metric.name == "jvm.memory.limit" or metric.name == "jvm.memory.committed") and attributes["jvm.memory.pool.name"] != "G1 Old Gen"'
+        - 'metric.name == "db.client.connections.usage" and attributes["state"] != "used"'
+        - 'metric.name == "jvm.gc.duration" and attributes["jvm.gc.name"] != "G1 Young Generation"'
   memory_limiter: # каждые 10сек проверка сколько памяти используем, при использовании 80% памяти замедляем работу
     check_interval: 10s
     limit_percentage: 80
@@ -43,7 +52,7 @@ service: # описываем все что делает коллектор по
   pipelines:
     metrics:
       receivers: [ otlp ]
-      processors: [ memory_limiter, batch ]
+      processors: [ memory_limiter, batch, filter/keep_only_important_metrics]
       exporters: [ routing ]
 
     metrics/business:
