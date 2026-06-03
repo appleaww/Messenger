@@ -1,4 +1,3 @@
-# =========================
 # Java / Backend
 backend/target/
 backend/*.jar
@@ -17,7 +16,6 @@ backend/.mvn/
 backend/mvnw.cmd
 backend/mvnw
 
-# =========================
 # Node / Frontend
 frontend/node_modules/
 frontend/dist/
@@ -27,12 +25,10 @@ frontend/.env.local
 frontend/.env.production
 frontend/.env.development
 
-# =========================
 # Analytics
 analytics/.idea
 analytics/.venv
 analytics/analytics.iml
-
 
 # Logs
 frontend/npm-debug.log*
@@ -46,9 +42,7 @@ frontend/build/
 frontend/.nuxt/
 frontend/.output/
 
-# =========================
 # IDE
-# IntelliJ
 .idea/
 *.iws
 *.iml
@@ -66,7 +60,6 @@ out/
 *.sln
 *.sw?
 
-# =========================
 # OS / System
 .DS_Store
 .DS_Store?
@@ -79,8 +72,6 @@ Thumbs.db
 *~
 .env
 
-# =========================
 # Common logs
-# =========================
 logs/
 *.log

@@ -1,5 +1,6 @@
 package io.github.appleaww.messenger.service;
 
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.TypingDTO;
 import io.github.appleaww.messenger.model.dto.request.MessageCreateRequestDTO;
 import io.github.appleaww.messenger.model.dto.request.ReadReceiptRequestDTO;
@@ -40,13 +41,17 @@ class MessageServiceTest {
     @Mock private MessageRepository messageRepository;
     @Mock private UserRepository userRepository;
     @Mock private ChatRepository chatRepository;
-    private MeterRegistry meterRegistry = new SimpleMeterRegistry();
+    @Mock private MetricsService metricsService;
 
     @InjectMocks private MessageService messageService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(messageService, "meterRegistry", meterRegistry);
+        MetricsService.MessageSendTimerContext mockTimerContext =
+                mock(MetricsService.MessageSendTimerContext.class);
+
+        lenient().when(metricsService.startMessageSendLatency())
+                .thenReturn(mockTimerContext);
     }
 
     @Test
@@ -86,7 +91,6 @@ class MessageServiceTest {
 
         when(messageRepository.save(any(Message.class))).thenReturn(savedMessage);
 
-
         MessageCreateResponseDTO result = messageService.createMessage(dto, sender);
 
         assertThat(result)
@@ -100,11 +104,8 @@ class MessageServiceTest {
                     assertThat(res.isRead()).isFalse();
                 });
 
-
-        assertThat(meterRegistry.timer("messenger.message.send.latency", Tags.of("chatId", chatId.toString())).count()).isEqualTo(1);
-        assertThat(meterRegistry.timer("messenger.message.send.latency", Tags.of("chatId", chatId.toString())).totalTime(TimeUnit.MILLISECONDS)).isGreaterThan(0.0);
-        assertThat(meterRegistry.counter("message.message.sent.throughput").count()).isEqualTo(1.0);
-
+        verify(metricsService).startMessageSendLatency();
+        verify(metricsService).messageSent();
         verify(userRepository).findById(senderId);
         verify(chatRepository).findById(chatId);
         verify(messageRepository).save(any(Message.class));
@@ -133,10 +134,9 @@ class MessageServiceTest {
         when(userRepository.findById(senderId)).thenReturn(Optional.of(sender));
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
-
         assertThatThrownBy(() -> messageService.createMessage(dto, sender))
                 .isInstanceOf(EntityNotFoundException.class)
-                        .hasMessageContaining("Recipient not found");
+                .hasMessageContaining("Recipient not found");
 
         verify(userRepository).findById(senderId);
         verify(chatRepository).findById(chatId);

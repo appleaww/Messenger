@@ -1,6 +1,7 @@
 package io.github.appleaww.messenger.service;
 
 import io.github.appleaww.messenger.mapper.ChatMapper;
+import io.github.appleaww.messenger.metrics.MetricsService;
 import io.github.appleaww.messenger.model.dto.ChatListItemDTO;
 import io.github.appleaww.messenger.model.dto.ParticipantDTO;
 import io.github.appleaww.messenger.model.dto.request.ChatCreateRequestDTO;
@@ -35,6 +36,8 @@ class ChatServiceTest {
     @Mock private ChatRepository chatRepository;
     @Mock private ChatMapper chatMapper;
     @Spy @InjectMocks private ChatService chatService;
+    @Mock MetricsService metricsService;
+
 
 
     @Test

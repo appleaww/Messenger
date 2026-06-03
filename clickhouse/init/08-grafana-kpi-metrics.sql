@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS grafana_kpi_metrics (
+CREATE TABLE IF NOT EXISTS  (
     timestamp DateTime64(0, 'Europe/Moscow') DEFAULT now64(0, 'Europe/Moscow'),
 
     sessions_per_minute           Int32      DEFAULT 0,

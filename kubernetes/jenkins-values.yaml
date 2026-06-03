@@ -1,0 +1,65 @@
+controller:
+  serviceType: NodePort # внешний доступ
+  nodePort: 30080
+
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "1.5Gi"
+    limits:
+      cpu: "600m"
+      memory: "2Gi"
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 5Gi
+
+  admin:
+    username: "appleaww"
+    password: "111111"
+
+  installPlugins:
+    - kubernetes
+    - workflow-job
+    - workflow-aggregator
+    - git
+    - git-client
+    - configuration-as-code
+    - docker-workflow
+    - github-branch-source
+    - gitlab-branch-source
+    - github-api
+    - gitlab-api
+    - credentials-binding
+    - plain-credentials
+    - ssh-credentials
+    - junit
+    - warnings-ng
+
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      kubernetes-cloud: |
+        jenkins:
+          clouds:
+          - kubernetes:
+              name: "kind-cluster"
+              serverUrl: "https://kubernetes.default.svc.cluster.local"
+              namespace: "jenkins"
+              jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+              credentialsId: "kubernetes-credentials"  
+              templates:
+              - name: "default"
+                label: "default"
+                containers:
+                - name: "jnlp"
+                  image: "jenkins/inbound-agent:latest"
+                  alwaysPullImage: true
+                  resourceRequestCpu: "200m"
+                  resourceRequestMemory: "512Mi"
+                  resourceLimitCpu: "800m"
+                  resourceLimitMemory: "1Gi"
+
+agent:
+  enabled: false
