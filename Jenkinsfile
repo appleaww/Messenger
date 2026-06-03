@@ -5,7 +5,6 @@ pipeline {
         pollSCM('0 H/3 * * *')} //проверяем гитлаб на наличие изменений каждые 3 часа
 
     options { //глобальные настройки пайплайна
-        timestamps() //добавляем время в логах jenkins
         skipStagesAfterUnstable //если одна стадия упала, следующие скипаем
         buildDiscarder(logRotator(numToKeepStr: '2')) //храним последние 2 сборки
         timeout(time: 15, unit: 'MINUTES') //пайплайн прерывается если висит более 15 мин
