@@ -1,0 +1,36 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'master'
+
+stages:
+  - build
+  - test
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG" #имя кэша
+  paths: #что именно сохраняем в кэш
+    - .m2/repository/
+
+image: eclipse-temurin:25-jdk
+
+build-job:
+  stage: build
+  before_script:
+    - cd backend
+  script:
+    - ./mvnw clean package -DskipTests=true -Djacoco.skip=true
+  artifacts:
+    paths:
+      - backend/target/
+    expire_in: 10 minutes
+
+test-job:
+  stage: test
+  needs:
+    - build-job
+  before_script:
+    - cd backend
+  script:
+    - ./mvnw test
+
