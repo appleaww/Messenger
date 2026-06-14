@@ -1,3 +1,6 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
@@ -6,31 +9,47 @@ workflow:
 stages:
   - build
   - test
+  - sast-test
 
-cache:
-  key: "$CI_COMMIT_REF_SLUG" #имя кэша
-  paths: #что именно сохраняем в кэш
-    - .m2/repository/
-
-image: eclipse-temurin:25-jdk
+variables:
+  SAST_EXCLUDED_PATHS: "target, node_modules, .git"
 
 build-job:
   stage: build
+  image: eclipse-temurin:25-jdk
+  cache:
+    key: "$CI_COMMIT_REF_SLUG" #имя кэша
+    paths: #что именно сохраняем в кэш
+      - backend/.m2/repository/
+    policy: push
   before_script:
     - cd backend
   script:
-    - ./mvnw clean package -DskipTests=true -Djacoco.skip=true
+    - ./mvnw package -B -DskipTests=true -Djacoco.skip=true
   artifacts:
     paths:
       - backend/target/
-    expire_in: 10 minutes
+    expire_in: 25 minutes
 
 test-job:
   stage: test
+  image: eclipse-temurin:25-jdk
   needs:
     - build-job
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - backend/.m2/repository/
+    policy: pull
   before_script:
     - cd backend
   script:
-    - ./mvnw test
+    - ./mvnw test -B
+
+sast:
+  stage: sast-test
+  needs:
+    - build-job
+  variables:
+    SAST_ANALYZER_IMAGE_TAG: "latest"
 
