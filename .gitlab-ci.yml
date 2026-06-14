@@ -49,7 +49,14 @@ test-job:
 sast:
   stage: sast-test
   needs:
-    - build-job
+      - job: build-job
+        artifacts: true
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - backend/.m2/repository/
+    policy: pull
   variables:
-    SAST_ANALYZER_IMAGE_TAG: "latest"
+    COMPILE: "false"
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/backend/.m2/repository
 
